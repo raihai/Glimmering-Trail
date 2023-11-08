@@ -29,6 +29,20 @@ void APlatformCharacter::Tick(float DeltaTime)
 void APlatformCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	InputComponent->BindAxis("MoveSide", this, &APlatformCharacter::MoveSide);
+	InputComponent->BindAxis("MoveForward", this, &APlatformCharacter::MoveForward);
+
+}
+
+void APlatformCharacter::MoveForward(float AxisValue)
+{
+
+
+}
+
+void APlatformCharacter::MoveSide(float AxisValue)
+{
 }
 
