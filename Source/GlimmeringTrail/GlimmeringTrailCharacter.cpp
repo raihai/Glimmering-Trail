@@ -85,11 +85,12 @@ void AGlimmeringTrailCharacter::SetupPlayerInputComponent(class UInputComponent*
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AGlimmeringTrailCharacter::Look);
 
 	}
-
+	 
 }
 
 void AGlimmeringTrailCharacter::Move(const FInputActionValue& Value)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Moving Forward"));
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
