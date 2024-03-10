@@ -3,13 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
-#include "PlayerMovementComponent.h"
+#include "GameFramework/Pawn.h"
 #include "InputActionValue.h"
-#include "PlatformCharacter.generated.h"
+#include "PlayerMovementComponent.h"
+#include "P_BasePlayer.generated.h"
 
-UCLASS(config = Game)
-class GLIMMERINGTRAIL_API APlatformCharacter : public ACharacter
+
+UCLASS()
+class GLIMMERINGTRAIL_API AP_BasePlayer : public APawn
 {
 	GENERATED_BODY()
 
@@ -27,27 +28,27 @@ class GLIMMERINGTRAIL_API APlatformCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* IA_LeftRightMove;
 
-
-
 public:
-	// Sets default values for this character's properties
-	APlatformCharacter();
-
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	// Sets default values for this pawn's properties
+	AP_BasePlayer();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UPlayerMovementComponent* PlayerMoveComponent;
-
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+public:	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
+	UPROPERTY(VisibleAnywhere)
+	class UCapsuleComponent* CapsuleComponent;
 
 	void MoveForwardBackward(const FInputActionValue& Value);
 	void MoveLeftRight(const FInputActionValue& Value);

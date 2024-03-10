@@ -24,33 +24,39 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void SetMoveForwardValue(float AxisValue) { MoveForwardValue = AxisValue;}
-	void SetMoveSidewayValue(float AxisValue) { MovedSideValue = AxisValue; }
+	void SetMoveForwardValue(float AxisValue) { MoveForwardBackwardValue = AxisValue;}
+	void SetMoveSidewayValue(float AxisValue) { MoveSideVal = AxisValue; }
 
 	void SimulateMovement(float DeltaTime);
 
+
+	
 
 private:
 
 	FVector GetAirResistance();
 
+
+
 	// Player Physics
 	void ApplyRotation(float DeltaTime, float MoveSideValue);
 	void UpdateLocationFromVelocity(float DelatTime);
+	
 
 	UPROPERTY(EditAnywhere)
 	float Mass = 100; //kg
 
 	// force to character
 	UPROPERTY(EditAnywhere)
-	float MaxDriveForce = 10000;
+	float MaxDriveForce = 1000;
 
 	UPROPERTY(EditAnywhere)
-	float DragCoefficient = 16;
+	float DragCoefficient = 30;
 
 	UPROPERTY()
 	FVector Velocity;
+	FVector Velocity2;
 
-	float MoveForwardValue; 
-	float MovedSideValue;
+	float MoveForwardBackwardValue;
+	float MoveSideVal;
 };

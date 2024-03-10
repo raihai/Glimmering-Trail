@@ -1,28 +1,38 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "PlatformCharacter.h"
-#include "PlayerMovementComponent.h"
+#include "P_BasePlayer.h"
 #include "GameFramework/Controller.h"
 
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Components/CapsuleComponent.h"
+
+
 
 // Sets default values
-APlatformCharacter::APlatformCharacter()
+AP_BasePlayer::AP_BasePlayer()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+ 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	PlayerMoveComponent = CreateDefaultSubobject<UPlayerMovementComponent>(TEXT("MoveComponent"));
+	
+	
+	// Set size for collision capsule
+	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("RootComponent"));
+	SetRootComponent(CapsuleComponent);
+
+	// Adjust the collision capsule properties as needed
+	CapsuleComponent->InitCapsuleSize(34.0f, 88.0f);
+	CapsuleComponent->SetCollisionProfileName(TEXT("Pawn"));
 
 }
 
 // Called when the game starts or when spawned
-void APlatformCharacter::BeginPlay()
+void AP_BasePlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	//Add Input Mapping Context
 
 	APlayerController* PlayerController = Cast<APlayerController>(Controller);
 
@@ -37,32 +47,34 @@ void APlatformCharacter::BeginPlay()
 }
 
 // Called every frame
-void APlatformCharacter::Tick(float DeltaTime)
+void AP_BasePlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
 }
 
 // Called to bind functionality to input
-void APlatformCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+void AP_BasePlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
 
 		//Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &APlatformCharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &APlatformCharacter::StopJump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AP_BasePlayer::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AP_BasePlayer::StopJump);
 
 		//Moving
-		EnhancedInputComponent->BindAction(IA_ForwardBackwardMove, ETriggerEvent::Triggered, this, &APlatformCharacter::MoveForwardBackward);
-		EnhancedInputComponent->BindAction(IA_LeftRightMove, ETriggerEvent::Triggered, this, &APlatformCharacter::MoveLeftRight);
+		EnhancedInputComponent->BindAction(IA_ForwardBackwardMove, ETriggerEvent::Triggered, this, &AP_BasePlayer::MoveForwardBackward);
+		EnhancedInputComponent->BindAction(IA_LeftRightMove, ETriggerEvent::Triggered, this, &AP_BasePlayer::MoveLeftRight);
 
 
 
 	}
-
 }
 
-void APlatformCharacter::MoveForwardBackward(const FInputActionValue& Value)
+void AP_BasePlayer::MoveForwardBackward(const FInputActionValue& Value)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Moving Forward"));
 	if (PlayerMoveComponent == nullptr) {
@@ -70,11 +82,12 @@ void APlatformCharacter::MoveForwardBackward(const FInputActionValue& Value)
 		return;
 	}
 
+	
 	PlayerMoveComponent->SetMoveForwardValue(Value.Get<float>());
-
+	
 }
 
-void APlatformCharacter::MoveLeftRight(const FInputActionValue& Value)
+void AP_BasePlayer::MoveLeftRight(const FInputActionValue& Value)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Moving Sideway"));
 	if (PlayerMoveComponent == nullptr) {
@@ -82,15 +95,15 @@ void APlatformCharacter::MoveLeftRight(const FInputActionValue& Value)
 		return;
 	}
 	PlayerMoveComponent->SetMoveSidewayValue(Value.Get<float>());
+
 }
 
-
-void APlatformCharacter::Jump(const FInputActionValue& Value)
+void AP_BasePlayer::Jump(const FInputActionValue& Value)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Jump"));
 }
 
-void APlatformCharacter::StopJump(const FInputActionValue& Valuee)
+void AP_BasePlayer::StopJump(const FInputActionValue& Valuee)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Stop Jump"));
 }

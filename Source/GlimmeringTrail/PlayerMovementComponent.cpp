@@ -27,22 +27,34 @@ void UPlayerMovementComponent::BeginPlay()
 void UPlayerMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	
+	if (move) {
+		SimulateMovement(DeltaTime);
+	}
 
-	SimulateMovement(DeltaTime);
-	// ...
 }
 
 void UPlayerMovementComponent::SimulateMovement(float DeltaTime)
 {
-	FVector force = GetOwner()->GetActorForwardVector() * MaxDriveForce * MoveForwardValue;
+	// this is for character going forward
+	FVector force = GetOwner()->GetActorForwardVector() * MaxDriveForce *  MoveForwardBackwardValue;
 	force += GetAirResistance();
+
+	FVector force2 = GetOwner()->GetActorRightVector() * MaxDriveForce * MoveSideVal;
+
+	force += force2;
+	
+	UE_LOG(LogTemp, Warning, TEXT(" MFBV : %f AND MSV: %f"), MoveForwardBackwardValue, MoveSideVal);
+
 	FVector acceleration = force / Mass;
+
+	// ensure framerate independance
 	Velocity = Velocity + acceleration * DeltaTime;
 
-	ApplyRotation(DeltaTime, MovedSideValue);
+	//ApplyRotation(DeltaTime, MoveForwardBackwardValue);
 	UpdateLocationFromVelocity(DeltaTime);
-
 }
+
 
 FVector UPlayerMovementComponent::GetAirResistance()
 {
@@ -57,10 +69,12 @@ void UPlayerMovementComponent::ApplyRotation(float DeltaTime, float MoveSideValu
 
 void UPlayerMovementComponent::UpdateLocationFromVelocity(float DeltaTime)
 {
+
 	FVector Translation = Velocity * 100 * DeltaTime;
 	
 	FHitResult hitResult;
 	GetOwner()->AddActorWorldOffset(Translation, true, &hitResult);
+
 	if (hitResult.IsValidBlockingHit()) {
 		Velocity = FVector::ZeroVector;
 	}
