@@ -8,7 +8,7 @@ AGlimmeringTrailGameMode::AGlimmeringTrailGameMode()
 {
 	// set default pawn class to our Blueprinted character
 
-	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/BP_BasePlayer"));
+	static ConstructorHelpers::FClassFinder<APawn> PlayerPawnBPClass(TEXT("/Game/Characters/BP_BasePlayer"));
 	if (PlayerPawnBPClass.Class != NULL)
 	{
 		DefaultPawnClass = PlayerPawnBPClass.Class;

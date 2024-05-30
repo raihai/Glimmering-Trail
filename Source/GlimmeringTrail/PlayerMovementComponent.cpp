@@ -28,28 +28,29 @@ void UPlayerMovementComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	
-	if (move) {
+	//if () {
 		SimulateMovement(DeltaTime);
-	}
+	//}
 
 }
 
 void UPlayerMovementComponent::SimulateMovement(float DeltaTime)
 {
-	// this is for character going forward
 	FVector force = GetOwner()->GetActorForwardVector() * MaxDriveForce *  MoveForwardBackwardValue;
 	force += GetAirResistance();
 
 	FVector force2 = GetOwner()->GetActorRightVector() * MaxDriveForce * MoveSideVal;
-
 	force += force2;
 	
-	UE_LOG(LogTemp, Warning, TEXT(" MFBV : %f AND MSV: %f"), MoveForwardBackwardValue, MoveSideVal);
+//	UE_LOG(LogTemp, Warning, TEXT(" MFBV : %f AND MSV: %f"), MoveForwardBackwardValue, MoveSideVal);
 
 	FVector acceleration = force / Mass;
-
-	// ensure framerate independance
 	Velocity = Velocity + acceleration * DeltaTime;
+
+	if (Velocity.SizeSquared() < KINDA_SMALL_NUMBER)
+	{
+		Velocity = FVector::ZeroVector;
+	}
 
 	//ApplyRotation(DeltaTime, MoveForwardBackwardValue);
 	UpdateLocationFromVelocity(DeltaTime);

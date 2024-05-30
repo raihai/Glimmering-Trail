@@ -51,7 +51,9 @@ private:
 	class UCapsuleComponent* CapsuleComponent;
 
 	void MoveForwardBackward(const FInputActionValue& Value);
+	void StopMoveForwardBackward(const FInputActionValue& Value);
 	void MoveLeftRight(const FInputActionValue& Value);
+	void StopMoveLeftRight(const FInputActionValue& Value);
 
 	void Jump(const FInputActionValue& Value);
 	void StopJump(const FInputActionValue& Valuee);

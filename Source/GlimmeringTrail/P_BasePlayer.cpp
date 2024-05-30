@@ -67,7 +67,9 @@ void AP_BasePlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 		//Moving
 		EnhancedInputComponent->BindAction(IA_ForwardBackwardMove, ETriggerEvent::Triggered, this, &AP_BasePlayer::MoveForwardBackward);
+		EnhancedInputComponent->BindAction(IA_ForwardBackwardMove, ETriggerEvent::Completed, this, &AP_BasePlayer::StopMoveForwardBackward);
 		EnhancedInputComponent->BindAction(IA_LeftRightMove, ETriggerEvent::Triggered, this, &AP_BasePlayer::MoveLeftRight);
+		EnhancedInputComponent->BindAction(IA_LeftRightMove, ETriggerEvent::Completed, this, &AP_BasePlayer::StopMoveLeftRight);
 
 
 
@@ -87,6 +89,11 @@ void AP_BasePlayer::MoveForwardBackward(const FInputActionValue& Value)
 	
 }
 
+void AP_BasePlayer::StopMoveForwardBackward(const FInputActionValue& Value)
+{
+	PlayerMoveComponent->SetMoveForwardValue(0.0);
+}
+
 void AP_BasePlayer::MoveLeftRight(const FInputActionValue& Value)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Moving Sideway"));
@@ -96,6 +103,11 @@ void AP_BasePlayer::MoveLeftRight(const FInputActionValue& Value)
 	}
 	PlayerMoveComponent->SetMoveSidewayValue(Value.Get<float>());
 
+}
+
+void AP_BasePlayer::StopMoveLeftRight(const FInputActionValue& Value)
+{
+	PlayerMoveComponent->SetMoveSidewayValue(0.0);
 }
 
 void AP_BasePlayer::Jump(const FInputActionValue& Value)

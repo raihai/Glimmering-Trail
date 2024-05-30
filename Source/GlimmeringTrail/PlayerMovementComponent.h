@@ -51,7 +51,7 @@ private:
 	float MaxDriveForce = 1000;
 
 	UPROPERTY(EditAnywhere)
-	float DragCoefficient = 30;
+	float DragCoefficient = 100;
 
 	UPROPERTY()
 	FVector Velocity;
