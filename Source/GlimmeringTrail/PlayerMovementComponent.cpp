@@ -13,7 +13,6 @@ UPlayerMovementComponent::UPlayerMovementComponent()
 	// ...
 }
 
-
 // Called when the game starts
 void UPlayerMovementComponent::BeginPlay()
 {
@@ -27,51 +26,131 @@ void UPlayerMovementComponent::BeginPlay()
 void UPlayerMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	
-	//if () {
-		SimulateMovement(DeltaTime);
-	//}
 
 }
 
-void UPlayerMovementComponent::SimulateMovement(float DeltaTime)
+void UPlayerMovementComponent::SetMoveForwardValue(float AxisValue)
 {
-	FVector force = GetOwner()->GetActorForwardVector() * MaxDriveForce *  MoveForwardBackwardValue;
+	MoveForwardBackwardValue = AxisValue; // Reset quick stop flag if input is active
+	if (AxisValue != 0.0f){
+			bQuickStop = false;
+	}
+}
+
+void UPlayerMovementComponent::SetMoveSidewayValue(float AxisValue)
+{
+	MoveSideVal = AxisValue; 
+	if (AxisValue != 0.0f) {
+		bQuickStop = false;
+	}
+}
+
+void UPlayerMovementComponent::StopMovement()
+{
+	bQuickStop = true;
+	MoveForwardBackwardValue = 0.0f;
+	MoveSideVal = 0.0f;
+}
+
+/*oid UPlayerMovementComponent::HandleMovement(EPlayerGameState CurrentState, float DeltaTime)
+{
+	switch (CurrentState) {
+	case EPlayerGameState::Idle:
+		StopMovement();
+		SimulateMovement(DeltaTime, 0);
+		UE_LOG(LogTemp, Warning, TEXT("Idle state "));
+		break;
+	case  EPlayerGameState::Walking:
+		HandleWalking(DeltaTime);
+		UE_LOG(LogTemp, Warning, TEXT("walking state "));
+		break;
+	case  EPlayerGameState::Running:
+		HandleRunning(DeltaTime);
+		UE_LOG(LogTemp, Warning, TEXT("Running state "));
+		break;
+	case  EPlayerGameState::Jumping:
+		HandleJumping(DeltaTime);
+		UE_LOG(LogTemp, Warning, TEXT("Jumping State"));
+		break;
+	case EPlayerGameState::Falling:
+		HandleFalling(DeltaTime);
+		UE_LOG(LogTemp, Warning, TEXT("Falling State"));
+		break;
+	case  EPlayerGameState::WallJump:
+		break;
+	case  EPlayerGameState::WallSlide:
+		break;
+	case  EPlayerGameState::Dash:
+		break;
+
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("No state found"));
+	}*/
+//}
+
+void UPlayerMovementComponent::SimulateMovement(float DeltaTime, float MoveForce )
+{
+	FVector force = GetOwner()->GetActorForwardVector() * MoveForce *  MoveForwardBackwardValue;
+	force += GetOwner()->GetActorRightVector() * MoveForce * MoveSideVal; 
 	force += GetAirResistance();
 
-	FVector force2 = GetOwner()->GetActorRightVector() * MaxDriveForce * MoveSideVal;
-	force += force2;
-	
-//	UE_LOG(LogTemp, Warning, TEXT(" MFBV : %f AND MSV: %f"), MoveForwardBackwardValue, MoveSideVal);
-
 	FVector acceleration = force / Mass;
-	Velocity = Velocity + acceleration * DeltaTime;
+	Velocity += acceleration * DeltaTime;
 
-	if (Velocity.SizeSquared() < KINDA_SMALL_NUMBER)
-	{
+	if (bQuickStop){
+		Velocity *= 0.8f; 
+	}
+
+	if (Velocity.SizeSquared() < KINDA_SMALL_NUMBER){
 		Velocity = FVector::ZeroVector;
 	}
 
-	//ApplyRotation(DeltaTime, MoveForwardBackwardValue);
+	ApplyRotation(DeltaTime, MoveForwardBackwardValue);
 	UpdateLocationFromVelocity(DeltaTime);
 }
 
+void UPlayerMovementComponent::HandleWalking(float DeltaTime)
+{
+	SimulateMovement(DeltaTime, 600);
+}
+
+void UPlayerMovementComponent::HandleRunning(float DeltaTime)
+{
+	SimulateMovement(DeltaTime, 2000);
+}
+
+void UPlayerMovementComponent::HandleJumping(float DeltaTime)
+{
+	Velocity += FVector(0,0, 10);
+
+	UE_LOG(LogTemp, Warning, TEXT("Jumping right now"));
+	
+	UpdateLocationFromVelocity(DeltaTime);
+}
+
+void UPlayerMovementComponent::HandleFalling(float DeltaTime)
+{
+	// need to push player down
+	UE_LOG(LogTemp, Warning, TEXT("Falling down now"));
+
+	Velocity += FVector(0, 0, -200.0f) * DeltaTime;
+	UpdateLocationFromVelocity(DeltaTime);
+}
 
 FVector UPlayerMovementComponent::GetAirResistance()
 {
 	return -Velocity.GetSafeNormal() * Velocity.SizeSquared() * DragCoefficient;
 }
 
-
 void UPlayerMovementComponent::ApplyRotation(float DeltaTime, float MoveSideValue)
 {
+	// apply torque to the player 
 	return;
 }
 
 void UPlayerMovementComponent::UpdateLocationFromVelocity(float DeltaTime)
 {
-
-	FVector Translation = Velocity * 100 * DeltaTime;
+	FVector Translation = Velocity * 100 * DeltaTime; 
 	
 	FHitResult hitResult;
 	GetOwner()->AddActorWorldOffset(Translation, true, &hitResult);

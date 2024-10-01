@@ -2,31 +2,28 @@
 
 
 #include "P_BasePlayer.h"
+#include "PlayerMovementComponent.h"
 #include "GameFramework/Controller.h"
-
 #include "Components/InputComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Components/CapsuleComponent.h"
 
-
-
 // Sets default values
 AP_BasePlayer::AP_BasePlayer()
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	PlayerMoveComponent = CreateDefaultSubobject<UPlayerMovementComponent>(TEXT("MoveComponent"));
 	
-	
-	// Set size for collision capsule
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("RootComponent"));
 	SetRootComponent(CapsuleComponent);
 
-	// Adjust the collision capsule properties as needed
 	CapsuleComponent->InitCapsuleSize(34.0f, 88.0f);
 	CapsuleComponent->SetCollisionProfileName(TEXT("Pawn"));
 
+	CurrMainState = EPlayerMainState::Grounded;
+	CurrGroundState = EPlayerGroundedSubState::Idle;
+	CurrAirborneState = EPlayerAirborneSubState::Falling;
 }
 
 // Called when the game starts or when spawned
@@ -51,6 +48,15 @@ void AP_BasePlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (PlayerMoveComponent) {
+
+		if (bJumpPressed) {
+			JumpKeyHoldTime += DeltaTime;
+		}
+
+		//PlayerMoveComponent->HandleMovement(CurrentState, DeltaTime);
+
+	}
 }
 
 // Called to bind functionality to input
@@ -62,61 +68,118 @@ void AP_BasePlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
 
 		//Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &AP_BasePlayer::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AP_BasePlayer::StopJump);
+		EnhancedInputComponent->BindAction(IA_JumpUp, ETriggerEvent::Triggered, this, &AP_BasePlayer::Jump);
+		EnhancedInputComponent->BindAction(IA_JumpUp, ETriggerEvent::Completed, this, &AP_BasePlayer::StopJump);
 
 		//Moving
-		EnhancedInputComponent->BindAction(IA_ForwardBackwardMove, ETriggerEvent::Triggered, this, &AP_BasePlayer::MoveForwardBackward);
-		EnhancedInputComponent->BindAction(IA_ForwardBackwardMove, ETriggerEvent::Completed, this, &AP_BasePlayer::StopMoveForwardBackward);
-		EnhancedInputComponent->BindAction(IA_LeftRightMove, ETriggerEvent::Triggered, this, &AP_BasePlayer::MoveLeftRight);
-		EnhancedInputComponent->BindAction(IA_LeftRightMove, ETriggerEvent::Completed, this, &AP_BasePlayer::StopMoveLeftRight);
+		EnhancedInputComponent->BindAction(IA_MoveForward, ETriggerEvent::Triggered, this, &AP_BasePlayer::MoveForwardBackward);
+		EnhancedInputComponent->BindAction(IA_MoveForward, ETriggerEvent::Completed, this, &AP_BasePlayer::StopMoveForwardBackward);
+		EnhancedInputComponent->BindAction(IA_MoveSideway, ETriggerEvent::Triggered, this, &AP_BasePlayer::MoveLeftRight);
+		EnhancedInputComponent->BindAction(IA_MoveSideway, ETriggerEvent::Completed, this, &AP_BasePlayer::StopMoveLeftRight);
 
-
-
+		//movement modifiers
+		EnhancedInputComponent->BindActionValueLambda(IA_Run, ETriggerEvent::Triggered, [this](const FInputActionValue& InputActionValue){
+			bIsRunning = true; });
+		EnhancedInputComponent->BindActionValueLambda(IA_Run, ETriggerEvent::Completed, [this](const FInputActionValue& InputActionValue) {
+			bIsRunning = false; });
 	}
+}
+
+//void AP_BasePlayer::ChangeState(EPlayerGameState NewState)
+//{
+//	if (CurrentState != NewState){
+//		CurrentState = NewState;
+//	}
+//}
+
+void AP_BasePlayer::ChangePrimaryState(EPlayerMainState NewPrimaryState)
+{
+}
+
+void AP_BasePlayer::ChangeGroundedSubState(EPlayerGroundedSubState NewGroundedSubState)
+{
+}
+
+void AP_BasePlayer::ChangeAirborneSubState(EPlayerAirborneSubState NewAirborneSubState)
+{
 }
 
 void AP_BasePlayer::MoveForwardBackward(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Moving Forward"));
 	if (PlayerMoveComponent == nullptr) {
-		UE_LOG(LogTemp, Warning, TEXT("No moveCmoponent found "));
+		UE_LOG(LogTemp, Warning, TEXT("No MoveComponent found "));
 		return;
 	}
-
-	
 	PlayerMoveComponent->SetMoveForwardValue(Value.Get<float>());
-	
+
+	if (bIsRunning && IsGrounded()) { CurrGroundState = EPlayerGroundedSubState::Running; }
+	else {
+		CurrGroundState = EPlayerGroundedSubState::Walking;
+		CurrAirborneState = EPlayerAirborneSubState::Falling;
+	};
 }
 
 void AP_BasePlayer::StopMoveForwardBackward(const FInputActionValue& Value)
 {
-	PlayerMoveComponent->SetMoveForwardValue(0.0);
+	CurrGroundState = EPlayerGroundedSubState::Idle;
+	CurrAirborneState = EPlayerAirborneSubState::Falling;
 }
 
 void AP_BasePlayer::MoveLeftRight(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Moving Sideway"));
 	if (PlayerMoveComponent == nullptr) {
-		UE_LOG(LogTemp, Warning, TEXT("No moveComponent found "));
+		UE_LOG(LogTemp, Warning, TEXT("No MoveComponent found "));
 		return;
 	}
-	PlayerMoveComponent->SetMoveSidewayValue(Value.Get<float>());
 
+	PlayerMoveComponent->SetMoveSidewayValue(Value.Get<float>());
+	if (bIsRunning && IsGrounded()) { CurrGroundState = EPlayerGroundedSubState::Running;}
+	else {	
+		CurrGroundState = EPlayerGroundedSubState::Walking; 
+		CurrAirborneState = EPlayerAirborneSubState::Falling;
+	};
 }
 
 void AP_BasePlayer::StopMoveLeftRight(const FInputActionValue& Value)
 {
-	PlayerMoveComponent->SetMoveSidewayValue(0.0);
+	CurrGroundState = EPlayerGroundedSubState::Idle;
+	CurrAirborneState = EPlayerAirborneSubState::Falling;
 }
 
 void AP_BasePlayer::Jump(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Jump"));
+	bJumpPressed = true;
+	if (IsGrounded() && JumpKeyHoldTime <= 1.0f) {
+		CurrMainState = EPlayerMainState::Airborne;
+	} else{
+		bJumpPressed = false;
+		JumpKeyHoldTime = 0.0f;
+		//CurrentState = EPlayerGameState::Falling;
+	}
 }
 
 void AP_BasePlayer::StopJump(const FInputActionValue& Valuee)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Stop Jump"));
+	if (IsGrounded()) {
+		CurrMainState = EPlayerMainState::Grounded;
+	}
+	else {
+		//CurrentState = EPlayerGameState::Falling;
+	}
+}
+
+bool AP_BasePlayer::IsGrounded()
+{
+	FHitResult hitResult;
+	FVector startLocation = this->GetActorLocation();
+	FVector endLocation = startLocation - FVector(0, 0, 110.0f);
+
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this); // Ignore the player itself in the raycast
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECC_Visibility, CollisionParams);
+
+	DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Red, false, 10.0f, 0, 5.0f);
+	return bHit;
 }
 

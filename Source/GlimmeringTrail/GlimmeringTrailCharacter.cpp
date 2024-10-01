@@ -90,7 +90,6 @@ void AGlimmeringTrailCharacter::SetupPlayerInputComponent(class UInputComponent*
 
 void AGlimmeringTrailCharacter::Move(const FInputActionValue& Value)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Moving Forward"));
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 

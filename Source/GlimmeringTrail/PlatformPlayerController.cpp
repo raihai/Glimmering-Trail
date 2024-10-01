@@ -7,6 +7,18 @@ void APlatformPlayerController::GameHasEnded(AActor* EndGameFocus, bool bIsWinne
 {
 }
 
+void APlatformPlayerController::PressJump()
+{
+	if (JumpDelegate.IsBound()) {
+		JumpDelegate.Broadcast();
+	}
+}
+
 void APlatformPlayerController::BeginPlay()
 {
+}
+
+FJUMPSIGNNATURE* APlatformPlayerController::GetJumpDelegate()
+{
+	return &JumpDelegate;
 }

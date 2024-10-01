@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "EPlayerGameState.h"
 #include "PlayerMovementComponent.generated.h"
 
 
@@ -24,39 +25,43 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void SetMoveForwardValue(float AxisValue) { MoveForwardBackwardValue = AxisValue;}
-	void SetMoveSidewayValue(float AxisValue) { MoveSideVal = AxisValue; }
+	void SetMoveForwardValue(float AxisValue);
+	void SetMoveSidewayValue(float AxisValue);
 
-	void SimulateMovement(float DeltaTime);
-
-
-	
+	void StopMovement();
+	//void HandleMovement(EPlayerGameState PlayerState, float DeltaTime);
 
 private:
 
+	void SimulateMovement(float DeltaTime, float MaxForce);
+	void HandleWalking(float DeltaTime);
+	void HandleRunning(float DeltaTime);
+	void HandleJumping(float DeltaTime);
+	void HandleFalling(float DeltaTime);
+
+
+	//helper func
 	FVector GetAirResistance();
 
-
-
-	// Player Physics
 	void ApplyRotation(float DeltaTime, float MoveSideValue);
 	void UpdateLocationFromVelocity(float DelatTime);
 	
+	UPROPERTY(EditAnywhere)
+	float Mass = 50; 
 
 	UPROPERTY(EditAnywhere)
-	float Mass = 100; //kg
+	float DragCoefficient = 25;
 
-	// force to character
-	UPROPERTY(EditAnywhere)
-	float MaxDriveForce = 1000;
+	bool bQuickStop = false;
 
-	UPROPERTY(EditAnywhere)
-	float DragCoefficient = 100;
+	// jump stuff
+	int JumpCount = 0;
 
 	UPROPERTY()
 	FVector Velocity;
-	FVector Velocity2;
-
+	
 	float MoveForwardBackwardValue;
 	float MoveSideVal;
+
+	// shall I do hierarchical state machine or bitmask
 };

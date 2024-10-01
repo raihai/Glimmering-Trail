@@ -4,47 +4,62 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "EPlayerGameState.h"
+#include "../plugins\CustomStateMachine\Source\CustomStateMachine\Public\PlayerStateComponent.h"
 #include "InputActionValue.h"
-#include "PlayerMovementComponent.h"
 #include "P_BasePlayer.generated.h"
-
 
 UCLASS()
 class GLIMMERINGTRAIL_API AP_BasePlayer : public APawn
 {
 	GENERATED_BODY()
 
-	/** MappingContext */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputMappingContext* PlayerInputMap;
-	/** Jump Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* JumpAction;
-
-	/** Move Input Action */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* IA_ForwardBackwardMove;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	class UInputAction* IA_LeftRightMove;
-
 public:
-	// Sets default values for this pawn's properties
+
 	AP_BasePlayer();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UPlayerMovementComponent* PlayerMoveComponent;
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	//Manage player states
+	//void ChangeState(EPlayerGameState NewState);
+
+	void ChangePrimaryState(EPlayerMainState NewPrimaryState);
+	void ChangeGroundedSubState(EPlayerGroundedSubState NewGroundedSubState);
+	void ChangeAirborneSubState(EPlayerAirborneSubState NewAirborneSubState);
+
+	// Current player state
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MainState")
+	EPlayerMainState CurrMainState;
+	
+	// Current player state
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GroundState")
+	EPlayerGroundedSubState CurrGroundState;
+
+	// Current player state
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AirborneState")
+	EPlayerAirborneSubState CurrAirborneState;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	//UStateManagerComponent* StateManager;
+	
+protected:
+	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputMappingContext* PlayerInputMap;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* IA_JumpUp;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* IA_MoveForward;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* IA_MoveSideway;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* IA_Run;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UPlayerMovementComponent* PlayerMoveComponent;
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -57,5 +72,22 @@ private:
 
 	void Jump(const FInputActionValue& Value);
 	void StopJump(const FInputActionValue& Valuee);
+	bool IsGrounded();
+
+	void DoubleJump();
+	void WallJump();
+	void WallSlide();
+	void Dash();
+
+	float CoyoteTime;
+	float JumpBufferTime;
+
+	float JumpKeyHoldTime = 0.0f;
+	bool bJumpPressed = false;
+
+	bool bCanDoubleJump;
+	bool bIsWallJumping;
+	bool bIsDashing;
+	bool bIsRunning;
 
 };
