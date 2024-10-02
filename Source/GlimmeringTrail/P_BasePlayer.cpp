@@ -12,6 +12,11 @@
 // Sets default values
 AP_BasePlayer::AP_BasePlayer()
 {
+
+	//state manager
+
+	//StateManager = CreateDefaultSubobject<UPlayerStateComponent>(TEXT("State Manager"));
+
 	PrimaryActorTick.bCanEverTick = true;
 	PlayerMoveComponent = CreateDefaultSubobject<UPlayerMovementComponent>(TEXT("MoveComponent"));
 	
@@ -30,6 +35,8 @@ AP_BasePlayer::AP_BasePlayer()
 void AP_BasePlayer::BeginPlay()
 {
 	Super::BeginPlay();
+
+//	StateManager->InitStateManager();
 
 	APlayerController* PlayerController = Cast<APlayerController>(Controller);
 
@@ -68,8 +75,8 @@ void AP_BasePlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
 
 		//Jumping
-		EnhancedInputComponent->BindAction(IA_JumpUp, ETriggerEvent::Triggered, this, &AP_BasePlayer::Jump);
-		EnhancedInputComponent->BindAction(IA_JumpUp, ETriggerEvent::Completed, this, &AP_BasePlayer::StopJump);
+		//EnhancedInputComponent->BindAction(IA_JumpUp, ETriggerEvent::Triggered, this, &AP_BasePlayer::Jump);
+	//	EnhancedInputComponent->BindAction(IA_JumpUp, ETriggerEvent::Completed, this, &AP_BasePlayer::StopJump);
 
 		//Moving
 		EnhancedInputComponent->BindAction(IA_MoveForward, ETriggerEvent::Triggered, this, &AP_BasePlayer::MoveForwardBackward);

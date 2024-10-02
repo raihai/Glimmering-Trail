@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "MyPlayerInterface.h"
+#include "InputActionValue.h"
 #include "GameFramework/PlayerController.h"
 #include "PlatformPlayerController.generated.h"
 
@@ -20,8 +21,21 @@ public:
 
 	void PressJump();
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputMappingContext* PlayerInputMap;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* IA_JumpUp;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* IA_MoveForward;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* IA_MoveSideway;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* IA_Run;
+
 protected:
 	// Called when the game starts or when spawned
+	virtual void SetupInputComponent() override;
+
 	virtual void BeginPlay() override;
 	virtual FJUMPSIGNNATURE* GetJumpDelegate() override;
 

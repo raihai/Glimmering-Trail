@@ -49,10 +49,10 @@ protected:
 
 private:
 
-	void MoveForwardBackward(const FInputActionValue& Value);
-	void MoveLeftRight(const FInputActionValue& Value);
+	//void MoveForwardBackward(const FInputActionValue& Value);
+	//void MoveLeftRight(const FInputActionValue& Value);
 
-	void Jump(const FInputActionValue& Value);
-	void StopJump(const FInputActionValue& Valuee);
+	//void Jump(const FInputActionValue& Value);
+//	void StopJump(const FInputActionValue& Valuee);
 
 };

@@ -10,14 +10,14 @@ public class CustomStateMachine : ModuleRules
 		
 		PublicIncludePaths.AddRange(
 			new string[] {
-               //  "CustomStateMachine/Public"
+               
             }
 			);
 				
 		
 		PrivateIncludePaths.AddRange(
 			new string[] {
-             //   "CustomStateMachine/Private"
+             
             }
 			);
 			
@@ -25,7 +25,7 @@ public class CustomStateMachine : ModuleRules
 		PublicDependencyModuleNames.AddRange(
 			new string[]
 			{
-                "Core", "CoreUObject", "Engine", "InputCore",
+                "Core", "CoreUObject", "Engine", "InputCore", 
                
 				// ... add other public dependencies that you statically link with here ...
 			}
@@ -35,11 +35,7 @@ public class CustomStateMachine : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
-				"CoreUObject",
-				"Engine",
-				"Slate",
-				"SlateCore",
-               // "CustomStateMachine",
+			
 
 				// ... add private dependencies that you statically link with here ...	
 			}

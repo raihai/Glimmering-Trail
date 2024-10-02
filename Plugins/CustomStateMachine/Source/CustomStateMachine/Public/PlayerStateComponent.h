@@ -8,6 +8,7 @@
 #include "PlayerStateComponent.generated.h"
 
 
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class CUSTOMSTATEMACHINE_API UPlayerStateComponent : public UActorComponent
 {

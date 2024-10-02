@@ -5,8 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "EPlayerGameState.h"
-#include "../plugins\CustomStateMachine\Source\CustomStateMachine\Public\PlayerStateComponent.h"
 #include "InputActionValue.h"
+#include "../Plugins/CustomStateMachine/Source/CustomStateMachine/Public/PlayerStateComponent.h" 
+
 #include "P_BasePlayer.generated.h"
 
 UCLASS()
@@ -41,8 +42,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AirborneState")
 	EPlayerAirborneSubState CurrAirborneState;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite) 
-	//UStateManagerComponent* StateManager;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	UPlayerStateComponent* StateManager;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -61,6 +62,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UPlayerMovementComponent* PlayerMoveComponent;
 
+	void DoubleJump();
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	class UCapsuleComponent* CapsuleComponent;
@@ -74,7 +77,7 @@ private:
 	void StopJump(const FInputActionValue& Valuee);
 	bool IsGrounded();
 
-	void DoubleJump();
+	//void DoubleJump();
 	void WallJump();
 	void WallSlide();
 	void Dash();

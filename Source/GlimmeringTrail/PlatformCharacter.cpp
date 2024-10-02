@@ -48,50 +48,10 @@ void APlatformCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent)) {
 
-		//Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &APlatformCharacter::Jump);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &APlatformCharacter::StopJump);
-
-		//Moving
-		EnhancedInputComponent->BindAction(IA_ForwardBackwardMove, ETriggerEvent::Triggered, this, &APlatformCharacter::MoveForwardBackward);
-		EnhancedInputComponent->BindAction(IA_LeftRightMove, ETriggerEvent::Triggered, this, &APlatformCharacter::MoveLeftRight);
 
 
 
 	}
 
-}
-
-void APlatformCharacter::MoveForwardBackward(const FInputActionValue& Value)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Moving Forward"));
-	if (PlayerMoveComponent == nullptr) {
-		UE_LOG(LogTemp, Warning, TEXT("No moveCmoponent found "));
-		return;
-	}
-
-	PlayerMoveComponent->SetMoveForwardValue(Value.Get<float>());
-
-}
-
-void APlatformCharacter::MoveLeftRight(const FInputActionValue& Value)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Moving Sideway"));
-	if (PlayerMoveComponent == nullptr) {
-		UE_LOG(LogTemp, Warning, TEXT("No moveComponent found "));
-		return;
-	}
-	PlayerMoveComponent->SetMoveSidewayValue(Value.Get<float>());
-}
-
-
-void APlatformCharacter::Jump(const FInputActionValue& Value)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Jump"));
-}
-
-void APlatformCharacter::StopJump(const FInputActionValue& Valuee)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Stop Jump"));
 }
 
