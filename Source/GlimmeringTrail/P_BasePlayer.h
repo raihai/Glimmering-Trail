@@ -44,6 +44,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
 	UPlayerStateComponent* StateManager;
+
+	void DoubleJump();
+	bool IsGrounded();
 	
 protected:
 	virtual void BeginPlay() override;
@@ -62,7 +65,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UPlayerMovementComponent* PlayerMoveComponent;
 
-	void DoubleJump();
+	
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -75,8 +78,7 @@ private:
 
 	void Jump(const FInputActionValue& Value);
 	void StopJump(const FInputActionValue& Valuee);
-	bool IsGrounded();
-
+	
 	//void DoubleJump();
 	void WallJump();
 	void WallSlide();

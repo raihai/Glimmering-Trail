@@ -5,12 +5,14 @@
 
 void UIdleState::PressJump()
 {
-	//PlayerRef->DoubleJump();
-
+	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Purple, "Idle state now");
 }
 
 void UIdleState::TickState()
 {
 
-	PlayerRef->StateManager->SwitchStateByKey("Air");
+	if (!PlayerRef->IsGrounded()) {
+		PlayerRef->StateManager->SwitchStateByKey("air");
+	}
+	
 }

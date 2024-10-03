@@ -40,4 +40,5 @@ void UPlayerStateBase::OnExitState()
 
 void UPlayerStateBase::PressJump()
 {
+
 }

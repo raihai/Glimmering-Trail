@@ -5,11 +5,15 @@
 
 void UAirborneState::PressJump()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "IN air ");
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, "In air ");
 }
 
 void UAirborneState::TickState()
 {
 	Super::TickState();
-	PlayerRef->StateManager->SwitchStateByKey("Air");
+
+	if (PlayerRef->IsGrounded()) {
+		PlayerRef->StateManager->SwitchStateByKey("idle");
+	}
+	
 }

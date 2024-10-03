@@ -13,9 +13,7 @@
 AP_BasePlayer::AP_BasePlayer()
 {
 
-	//state manager
-
-	//StateManager = CreateDefaultSubobject<UPlayerStateComponent>(TEXT("State Manager"));
+	StateManager = CreateDefaultSubobject<UPlayerStateComponent>(TEXT("State Manager"));
 
 	PrimaryActorTick.bCanEverTick = true;
 	PlayerMoveComponent = CreateDefaultSubobject<UPlayerMovementComponent>(TEXT("MoveComponent"));
@@ -36,7 +34,7 @@ void AP_BasePlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-//	StateManager->InitStateManager();
+	StateManager->InitStateManager();
 
 	APlayerController* PlayerController = Cast<APlayerController>(Controller);
 
