@@ -3,11 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputActionValue.h"
 #include "UObject/Interface.h"
+
 #include "MyPlayerInterface.generated.h"
 
 
 DECLARE_MULTICAST_DELEGATE(FJUMPSIGNNATURE);
+DECLARE_MULTICAST_DELEGATE_OneParam(FFRONTBACKSIGNNATURE, const FInputActionValue& Value);
+DECLARE_MULTICAST_DELEGATE_OneParam(FSIDEWAYSIGNNATURE,  const FInputActionValue& Value);
+DECLARE_MULTICAST_DELEGATE(FRUNSIGNNATURE);
+DECLARE_MULTICAST_DELEGATE(FSTOPSIGNAUTURE);
+//DECLARE_MULTICAST_DELEGATE(FJUMPSIGNNATURE);
+
 
 
 // This class does not need to be modified.
@@ -28,4 +36,9 @@ class GLIMMERINGTRAIL_API IMyPlayerInterface
 public:
 
 	virtual FJUMPSIGNNATURE* GetJumpDelegate() = 0;
+	virtual FFRONTBACKSIGNNATURE* GetFrontBackDelegate() = 0;
+	virtual FSIDEWAYSIGNNATURE* GetSidewayDelegate() = 0; 
+	virtual FRUNSIGNNATURE* GetRunDelegate() = 0;
+	virtual FSTOPSIGNAUTURE* GetMoveXYStopDelegate() = 0;
+	
 };

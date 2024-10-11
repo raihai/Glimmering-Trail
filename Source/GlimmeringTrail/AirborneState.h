@@ -17,7 +17,8 @@ class GLIMMERINGTRAIL_API UAirborneState : public UPlayerStateBase
 public:
 
 protected:
-	virtual void PressJump() override;
-	virtual void TickState() override;
+	virtual void HandleJump() override;
+	virtual void OnEnterState(AActor* OwnerRef);
+	virtual void TickState(float DeltaTime) override;
 	
 };

@@ -31,7 +31,7 @@ void UPlayerStateComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 	if (bCanTickState)
 	{
-		CurrentState->TickState();
+		CurrentState->TickState(DeltaTime);
 	}
 	if (bDebug)
 	{

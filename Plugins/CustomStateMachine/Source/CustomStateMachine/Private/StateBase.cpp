@@ -9,7 +9,7 @@ void UStateBase::OnEnterState(AActor* StateOwner)
 
 }
 
-void UStateBase::TickState()
+void UStateBase::TickState(float DeltaTime)
 {
 
 }
@@ -18,3 +18,5 @@ void UStateBase::OnExitState()
 {
 
 }
+
+

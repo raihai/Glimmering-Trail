@@ -19,7 +19,6 @@ class GLIMMERINGTRAIL_API APlatformPlayerController : public APlayerController, 
 public:
 	virtual void GameHasEnded(class AActor* EndGameFocus = nullptr, bool bIsWinner = false) override;
 
-	void PressJump();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputMappingContext* PlayerInputMap;
@@ -37,10 +36,27 @@ protected:
 	virtual void SetupInputComponent() override;
 
 	virtual void BeginPlay() override;
+
 	virtual FJUMPSIGNNATURE* GetJumpDelegate() override;
-
-
+	virtual FFRONTBACKSIGNNATURE* GetFrontBackDelegate() override;
+	virtual FSIDEWAYSIGNNATURE* GetSidewayDelegate() override;
+	virtual FRUNSIGNNATURE* GetRunDelegate() override;
+	virtual FSTOPSIGNAUTURE* GetMoveXYStopDelegate() override;
+	
 private:
+
+	void PressJumpButton();
+	void PressForwardBackwardButton(const FInputActionValue& Value);
+	void PressSidewaysButtonButton(const FInputActionValue& Value);
+	void PressRunButton();
+	void ReleaseMovementButton();
+
+
+
 	FJUMPSIGNNATURE JumpDelegate;
+	FFRONTBACKSIGNNATURE ForwardBackwardDelegate;
+	FSIDEWAYSIGNNATURE SidewayDelegate;
+	FRUNSIGNNATURE RunDelegate;
+	FSTOPSIGNAUTURE StopDelegate;
 	
 };

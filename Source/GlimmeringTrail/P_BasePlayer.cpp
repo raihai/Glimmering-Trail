@@ -24,9 +24,12 @@ AP_BasePlayer::AP_BasePlayer()
 	CapsuleComponent->InitCapsuleSize(34.0f, 88.0f);
 	CapsuleComponent->SetCollisionProfileName(TEXT("Pawn"));
 
-	CurrMainState = EPlayerMainState::Grounded;
+	//GRavity
+	//RootComponent->Gravity
+
+	/*CurrMainState = EPlayerMainState::Grounded;
 	CurrGroundState = EPlayerGroundedSubState::Idle;
-	CurrAirborneState = EPlayerAirborneSubState::Falling;
+	CurrAirborneState = EPlayerAirborneSubState::Falling;*/
 }
 
 // Called when the game starts or when spawned
@@ -36,7 +39,7 @@ void AP_BasePlayer::BeginPlay()
 
 	StateManager->InitStateManager();
 
-	APlayerController* PlayerController = Cast<APlayerController>(Controller);
+	/*APlayerController* PlayerController = Cast<APlayerController>(Controller);
 
 	if (PlayerController)
 	{
@@ -44,7 +47,7 @@ void AP_BasePlayer::BeginPlay()
 		{
 			Subsystem->AddMappingContext(PlayerInputMap, 0);
 		}
-	}
+	}*/
 	
 }
 
@@ -53,15 +56,15 @@ void AP_BasePlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (PlayerMoveComponent) {
+	//if (PlayerMoveComponent) {
 
-		if (bJumpPressed) {
-			JumpKeyHoldTime += DeltaTime;
-		}
+	//	if (bJumpPressed) {
+	//		JumpKeyHoldTime += DeltaTime;
+	//	}
 
-		//PlayerMoveComponent->HandleMovement(CurrentState, DeltaTime);
+	//	//PlayerMoveComponent->HandleMovement(CurrentState, DeltaTime);
 
-	}
+	//}
 }
 
 // Called to bind functionality to input
@@ -77,16 +80,16 @@ void AP_BasePlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	//	EnhancedInputComponent->BindAction(IA_JumpUp, ETriggerEvent::Completed, this, &AP_BasePlayer::StopJump);
 
 		//Moving
-		EnhancedInputComponent->BindAction(IA_MoveForward, ETriggerEvent::Triggered, this, &AP_BasePlayer::MoveForwardBackward);
-		EnhancedInputComponent->BindAction(IA_MoveForward, ETriggerEvent::Completed, this, &AP_BasePlayer::StopMoveForwardBackward);
-		EnhancedInputComponent->BindAction(IA_MoveSideway, ETriggerEvent::Triggered, this, &AP_BasePlayer::MoveLeftRight);
-		EnhancedInputComponent->BindAction(IA_MoveSideway, ETriggerEvent::Completed, this, &AP_BasePlayer::StopMoveLeftRight);
+		//EnhancedInputComponent->BindAction(IA_MoveForward, ETriggerEvent::Triggered, this, &AP_BasePlayer::MoveForwardBackward);
+		//EnhancedInputComponent->BindAction(IA_MoveForward, ETriggerEvent::Completed, this, &AP_BasePlayer::StopMoveForwardBackward);
+		//EnhancedInputComponent->BindAction(IA_MoveSideway, ETriggerEvent::Triggered, this, &AP_BasePlayer::MoveLeftRight);
+		//EnhancedInputComponent->BindAction(IA_MoveSideway, ETriggerEvent::Completed, this, &AP_BasePlayer::StopMoveLeftRight);
 
-		//movement modifiers
-		EnhancedInputComponent->BindActionValueLambda(IA_Run, ETriggerEvent::Triggered, [this](const FInputActionValue& InputActionValue){
-			bIsRunning = true; });
-		EnhancedInputComponent->BindActionValueLambda(IA_Run, ETriggerEvent::Completed, [this](const FInputActionValue& InputActionValue) {
-			bIsRunning = false; });
+		////movement modifiers
+		//EnhancedInputComponent->BindActionValueLambda(IA_Run, ETriggerEvent::Triggered, [this](const FInputActionValue& InputActionValue){
+		//	bIsRunning = true; });
+		//EnhancedInputComponent->BindActionValueLambda(IA_Run, ETriggerEvent::Completed, [this](const FInputActionValue& InputActionValue) {
+		//	bIsRunning = false; });
 	}
 }
 
@@ -97,21 +100,10 @@ void AP_BasePlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 //	}
 //}
 
-void AP_BasePlayer::ChangePrimaryState(EPlayerMainState NewPrimaryState)
-{
-}
-
-void AP_BasePlayer::ChangeGroundedSubState(EPlayerGroundedSubState NewGroundedSubState)
-{
-}
-
-void AP_BasePlayer::ChangeAirborneSubState(EPlayerAirborneSubState NewAirborneSubState)
-{
-}
 
 void AP_BasePlayer::MoveForwardBackward(const FInputActionValue& Value)
 {
-	if (PlayerMoveComponent == nullptr) {
+	/*if (PlayerMoveComponent == nullptr) {
 		UE_LOG(LogTemp, Warning, TEXT("No MoveComponent found "));
 		return;
 	}
@@ -121,17 +113,17 @@ void AP_BasePlayer::MoveForwardBackward(const FInputActionValue& Value)
 	else {
 		CurrGroundState = EPlayerGroundedSubState::Walking;
 		CurrAirborneState = EPlayerAirborneSubState::Falling;
-	};
+	};*/
 }
 
 void AP_BasePlayer::StopMoveForwardBackward(const FInputActionValue& Value)
-{
+{/*
 	CurrGroundState = EPlayerGroundedSubState::Idle;
-	CurrAirborneState = EPlayerAirborneSubState::Falling;
+	CurrAirborneState = EPlayerAirborneSubState::Falling;*/
 }
 
 void AP_BasePlayer::MoveLeftRight(const FInputActionValue& Value)
-{
+{/*
 	if (PlayerMoveComponent == nullptr) {
 		UE_LOG(LogTemp, Warning, TEXT("No MoveComponent found "));
 		return;
@@ -142,20 +134,20 @@ void AP_BasePlayer::MoveLeftRight(const FInputActionValue& Value)
 	else {	
 		CurrGroundState = EPlayerGroundedSubState::Walking; 
 		CurrAirborneState = EPlayerAirborneSubState::Falling;
-	};
+	};*/
 }
 
 void AP_BasePlayer::StopMoveLeftRight(const FInputActionValue& Value)
 {
-	CurrGroundState = EPlayerGroundedSubState::Idle;
-	CurrAirborneState = EPlayerAirborneSubState::Falling;
+	/*CurrGroundState = EPlayerGroundedSubState::Idle;
+	CurrAirborneState = EPlayerAirborneSubState::Falling;*/
 }
 
 void AP_BasePlayer::Jump(const FInputActionValue& Value)
 {
 	bJumpPressed = true;
 	if (IsGrounded() && JumpKeyHoldTime <= 1.0f) {
-		CurrMainState = EPlayerMainState::Airborne;
+		//CurrMainState = EPlayerMainState::Airborne;
 	} else{
 		bJumpPressed = false;
 		JumpKeyHoldTime = 0.0f;
@@ -165,18 +157,18 @@ void AP_BasePlayer::Jump(const FInputActionValue& Value)
 
 void AP_BasePlayer::StopJump(const FInputActionValue& Valuee)
 {
-	if (IsGrounded()) {
-		CurrMainState = EPlayerMainState::Grounded;
-	}
-	else {
-		//CurrentState = EPlayerGameState::Falling;
-	}
+	//if (IsGrounded()) {
+	//	CurrMainState = EPlayerMainState::Grounded;
+	//}
+	//else {
+	//	//CurrentState = EPlayerGameState::Falling;
+	//}
 }
 
 bool AP_BasePlayer::IsGrounded()
 {
 	FHitResult hitResult;
-	FVector startLocation = this->GetActorLocation();
+	FVector startLocation = GetActorLocation();
 	FVector endLocation = startLocation - FVector(0, 0, 110.0f);
 
 	FCollisionQueryParams CollisionParams;

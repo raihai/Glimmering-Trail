@@ -20,6 +20,9 @@ public:
 
 
 	virtual void OnEnterState(AActor* StateOwner);
-	virtual void TickState();
+	virtual void TickState(float DeltaTime);
 	virtual void OnExitState();
+	
+
+
 };

@@ -26,7 +26,7 @@ void UPlayerMovementComponent::BeginPlay()
 void UPlayerMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	
 }
 
 void UPlayerMovementComponent::SetMoveForwardValue(float AxisValue)
@@ -121,11 +121,40 @@ void UPlayerMovementComponent::HandleRunning(float DeltaTime)
 
 void UPlayerMovementComponent::HandleJumping(float DeltaTime)
 {
-	Velocity += FVector(0,0, 10);
-
 	UE_LOG(LogTemp, Warning, TEXT("Jumping right now"));
+
+
+	//velocity = velocity + gravity * dt
+	//position = position + velocity * dt
+
+	//--what is the gravity that would allow jumping to a given height ?
+	//	g = (2 * jumpHeight) / (timeToApex ^ 2)
+
+	//	--what is the initial jump velocity ?
+	//	initJumpVelocity = math.sqrt(2 * g * jumpHeight)
+
+	//	--how long does it take to reach the maximum height of a jump ?
+	//	--note : if "initJumpVelocity" is not a multiple of "g" the maximum height is reached between frames
+	//	timeToApex = initJumpVelocity / g
 	
-	UpdateLocationFromVelocity(DeltaTime);
+
+	//float timeToApex = testJumpVelocity / Gravity;
+	float g = FMath::Abs(GetWorld()->GetGravityZ());
+	
+	testJumpVelocity = sqrt(2 * g * JumpHeight);
+	FVector UpwardForce = GetOwner()->GetActorUpVector() * testJumpVelocity;
+
+	FVector acc = UpwardForce / Mass;
+	Velocity += acc + DeltaTime;
+	
+	FVector Translation = Velocity * DeltaTime;
+
+	FHitResult hitResult;
+	GetOwner()->AddActorWorldOffset(Translation, true, &hitResult);
+
+	if (hitResult.IsValidBlockingHit()) {
+		Velocity = FVector::ZeroVector;
+	}
 }
 
 void UPlayerMovementComponent::HandleFalling(float DeltaTime)

@@ -17,6 +17,8 @@ class GLIMMERINGTRAIL_API AP_BasePlayer : public APawn
 
 public:
 
+	// handle the player control/ movement in this class. 
+
 	AP_BasePlayer();
 
 	virtual void Tick(float DeltaTime) override;
@@ -26,27 +28,25 @@ public:
 	//Manage player states
 	//void ChangeState(EPlayerGameState NewState);
 
-	void ChangePrimaryState(EPlayerMainState NewPrimaryState);
-	void ChangeGroundedSubState(EPlayerGroundedSubState NewGroundedSubState);
-	void ChangeAirborneSubState(EPlayerAirborneSubState NewAirborneSubState);
+	//// Current player state
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MainState")
+	//EPlayerMainState CurrMainState;
+	//
+	//// Current player state
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GroundState")
+	//EPlayerGroundedSubState CurrGroundState;
 
-	// Current player state
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MainState")
-	EPlayerMainState CurrMainState;
-	
-	// Current player state
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "GroundState")
-	EPlayerGroundedSubState CurrGroundState;
-
-	// Current player state
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AirborneState")
-	EPlayerAirborneSubState CurrAirborneState;
+	//// Current player state
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AirborneState")
+	//EPlayerAirborneSubState CurrAirborneState;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
 	UPlayerStateComponent* StateManager;
 
-	void DoubleJump();
 	bool IsGrounded();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	class UPlayerMovementComponent* PlayerMoveComponent;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -62,10 +62,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* IA_Run;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	class UPlayerMovementComponent* PlayerMoveComponent;
-
-	
 
 private:
 	UPROPERTY(VisibleAnywhere)

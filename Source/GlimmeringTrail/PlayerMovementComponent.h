@@ -30,15 +30,17 @@ public:
 
 	void StopMovement();
 	//void HandleMovement(EPlayerGameState PlayerState, float DeltaTime);
+	void HandleJumping(float DeltaTime);
 
+	UPROPERTY()
+	FVector Velocity;
 private:
 
 	void SimulateMovement(float DeltaTime, float MaxForce);
 	void HandleWalking(float DeltaTime);
 	void HandleRunning(float DeltaTime);
-	void HandleJumping(float DeltaTime);
+	//void HandleJumping(float DeltaTime);
 	void HandleFalling(float DeltaTime);
-
 
 	//helper func
 	FVector GetAirResistance();
@@ -54,14 +56,16 @@ private:
 
 	bool bQuickStop = false;
 
-	// jump stuff
-	int JumpCount = 0;
+	float Gravity = 100.0;
+	float JumpHeight = 300;
+	FVector InitJumpVelocity = FVector(0, 0, 100);
+	float testJumpVelocity = 100;
 
-	UPROPERTY()
-	FVector Velocity;
+	/*UPROPERTY()
+	FVector Velocity;*/
 	
 	float MoveForwardBackwardValue;
 	float MoveSideVal;
 
-	// shall I do hierarchical state machine or bitmask
+	
 };
