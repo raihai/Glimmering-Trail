@@ -6,28 +6,17 @@
 void UGroundedState::HandleJump()
 {
 	// jumping from grounded state
-
-	bIsJumping = true;
-
-	//float g = FMath::Abs(GetWorld()->GetGravityZ());
-	
-	float g = (2 * 300) / (0.44 * 0.44);
-	float jumpHeight = 300.0f;
-
-	float jumpVelocity = sqrt(2 * g * jumpHeight);
-
-	FVector currVelocity = PlayerRef->PlayerMoveComponent->Velocity;
-	currVelocity.Z = jumpVelocity;
-
-	PlayerRef->PlayerMoveComponent->Velocity = currVelocity;
-
+	Super::HandleJump();
 }
 
 void UGroundedState::OnEnterState(AActor* OwnerRef)
 {
 	Super::OnEnterState(OwnerRef);
 
-
+	if (!FMath::IsNearlyZero(PlayerController->CurrentFrontBackValue) || !FMath::IsNearlyZero(PlayerController->CurrentSideValue))
+	{
+		PlayerRef->StateManager->SwitchStateByKey("Walking");
+	}
 
 }
 
@@ -35,23 +24,18 @@ void UGroundedState::TickState(float DeltaTime)
 {
 	Super::TickState(DeltaTime);
 	
-	if (bIsJumping) {
-		PlayerRef->StateManager->SwitchStateByKey("Air");
-		bIsJumping = false;
+	if (!FMath::IsNearlyZero(PlayerController->CurrentFrontBackValue) && !FMath::IsNearlyZero(PlayerController->CurrentSideValue)) {
+		PlayerRef->StateManager->SwitchStateByKey("Walking");
 	}
 	else {
-
-		PlayerRef->StateManager->SwitchStateByKey("Walking");
-
+		PlayerRef->StateManager->SwitchStateByKey("Idle");
 	}
 
-	// if
-	
 }
+
 
 void UGroundedState::OnExitState()
 {
 	Super::OnExitState();
-
-
+	
 }

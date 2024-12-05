@@ -165,18 +165,60 @@ void AP_BasePlayer::StopJump(const FInputActionValue& Valuee)
 	//}
 }
 
+bool AP_BasePlayer::CheckFloorAngle(FVector& angle)
+{
+	// find the angle between the player down vec and impact surface normal 
+
+	FVector playerDownVec = -GetActorUpVector();
+
+	float cosValue = FVector::DotProduct(playerDownVec, angle) / ( playerDownVec.Size() * angle.Size());
+
+	double angleInDegree = FMath::RadiansToDegrees(acos(cosValue));
+
+	if (angleInDegree > 45.0f) {
+
+		GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("Walkable surface detected"));
+		// Handle sliding or falling behavior
+		//FVector SlideDirection = FVector::CrossProduct(FVector::UpVector, angle).GetSafeNormal();  
+		//PlayerRef->PlayerMoveComponent->Velocity += SlideDirection * SlideSpeed * DeltaTime;
+
+		return true;
+	}
+
+
+	return false;
+}
+
 bool AP_BasePlayer::IsGrounded()
 {
 	FHitResult hitResult;
 	FVector startLocation = GetActorLocation();
 	FVector endLocation = startLocation - FVector(0, 0, 110.0f);
 
+	float sphereRadius = 34.0f;
+
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(this); // Ignore the player itself in the raycast
 
-	bool bHit = GetWorld()->LineTraceSingleByChannel(hitResult, startLocation, endLocation, ECC_Visibility, CollisionParams);
+	
+	bool bHit = GetWorld()->SweepSingleByChannel(hitResult, 
+		startLocation, 
+		endLocation,
+		FQuat::Identity,         
+		ECC_Visibility,           
+		FCollisionShape::MakeSphere(sphereRadius), 
+		CollisionParams)
+		;
 
 	DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Red, false, 10.0f, 0, 5.0f);
+
+	if (bHit) {
+		FVector surfaceNormal = hitResult.ImpactNormal; // need to check the angle
+		
+		CheckFloorAngle(surfaceNormal);
+	}
+
+	
 	return bHit;
 }
 

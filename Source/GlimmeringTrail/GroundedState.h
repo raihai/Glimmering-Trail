@@ -25,8 +25,11 @@ protected:
 	virtual void TickState(float DeltaTime) override;
 	virtual void OnExitState() override;
 
+
+
 private:
 
 	bool bIsJumping = false;
-
+	float m_FValue;
+	float m_SValue;
 };

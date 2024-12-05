@@ -6,78 +6,56 @@
 void UWalkingState::OnEnterState(AActor* OwnerRef)
 {
 	Super::OnEnterState(OwnerRef);
-
-
 }
 
 void UWalkingState::TickState(float DeltaTime)
 {
 	Super::TickState(DeltaTime);
 
-	FVector force = PlayerRef->GetActorForwardVector() * WalkForce * FrontBackValue ;
-	force += PlayerRef->GetActorRightVector() * WalkForce * SideValue;
+	//************ ensure that the gravity is always pusing down 
+	if (PlayerController->CurrentFrontBackValue == 0.0f && PlayerController->CurrentSideValue == 0.0f && m_Velocity.SizeSquared() < SMALL_NUMBER) {
+		
+		PlayerRef->StateManager->SwitchStateByKey("Grounded");
+		return;
+	}
+
+	FHitResult checkBelowPlayer;
+	if (IsGrounded(checkBelowPlayer)) {
+
+		PlayerRef->StateManager->SwitchStateByKey("Airborne");
+		return;
+	}
+	
+	if (SlopeCheck(checkBelowPlayer.ImpactNormal)) {
+		UE_LOG(LogTemp, Warning, TEXT("There is a slope"));
+		PlayerRef->StateManager->SwitchStateByKey("Sliding");
+		return;
+	}
+
+	FVector force = FVector::ZeroVector;
+	force += PlayerRef->GetActorForwardVector() * WalkForce * PlayerController->CurrentFrontBackValue;
+	force += PlayerRef->GetActorRightVector() * WalkForce * PlayerController->CurrentSideValue;
 	force += GetAirResistance();
 
-	/*FVector CurrVec = PlayerRef->PlayerMoveComponent->Velocity;
-	CurrVec *= PlayerRef->GetActorForwardVector() * WalkForce* FrontBackValue;
-	CurrVec = PlayerRef->GetActorRightVector() * WalkForce * SideValue;*/
-
 	FVector acceleration = force / 50;
-
-	/*if (bQuickStop) {
-		acceleration *= 0.8f;
-	}*/
+	m_Velocity = acceleration * DeltaTime;
 
 
-	FVector Translation = acceleration * DeltaTime * 100;
+	PlayerRef->PlayerMoveComponent->Velocity = m_Velocity;
 	FHitResult hitResult;
-	PlayerRef->AddActorWorldOffset(Translation, true, &hitResult);
 
-	if (PlayerRef->PlayerMoveComponent->Velocity.SizeSquared() < KINDA_SMALL_NUMBER) {
-		
-		PlayerRef->StateManager->SwitchStateByKey("Idle");
-	}
+	PlayerRef->AddActorWorldOffset(m_Velocity, true, &hitResult);
 }
 
-void UWalkingState::HandleForwardBackwardMovement(const FInputActionValue& Value)
+void UWalkingState::OnExitState()
 {
-	Super::HandleForwardBackwardMovement(Value);
-	FrontBackValue = Value.Get<float>();
+	Super::OnExitState();
 }
 
-void UWalkingState::HandleSidewayMovment(const FInputActionValue& Value)
-{
-	Super::HandleSidewayMovment(Value);
-	SideValue = Value.Get<float>();
-}
-
-void UWalkingState::HandleStopXYMovment()
-{
-	bQuickStop = true;
-	FrontBackValue = 0;
-	SideValue = 0;
-}
-
-void UWalkingState::HandleJump()
-{
-	
-	float g = (2 * 300) / (0.44 * 0.44);
-	float jumpHeight = 300.0f;
-
-	float jumpVelocity = sqrt(2 * g * jumpHeight);
-
-	FVector currVelocity = PlayerRef->PlayerMoveComponent->Velocity;
-	currVelocity.Z = jumpVelocity;
-
-	PlayerRef->PlayerMoveComponent->Velocity = currVelocity;
-
-	PlayerRef->StateManager->SwitchStateByKey("Air");
-
-}
 
 FVector UWalkingState::GetAirResistance()
 {
 	return -m_Velocity.GetSafeNormal() * m_Velocity.SizeSquared() * DragCoefficient;
-
 }
+
 

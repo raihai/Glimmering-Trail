@@ -47,6 +47,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	class UPlayerMovementComponent* PlayerMoveComponent;
+
+	/*float CurrentFrontBackValue = 0.0f;
+	float CurrentSideValue = 0.0f;*/
+
 	
 protected:
 	virtual void BeginPlay() override;
@@ -79,6 +83,8 @@ private:
 	void WallJump();
 	void WallSlide();
 	void Dash();
+
+	bool CheckFloorAngle(FVector& angle);
 
 	float CoyoteTime;
 	float JumpBufferTime;

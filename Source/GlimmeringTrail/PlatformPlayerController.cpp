@@ -20,33 +20,120 @@ void APlatformPlayerController::PressJumpButton()
 
 void APlatformPlayerController::PressForwardBackwardButton(const FInputActionValue& Value)
 {
-	if (ForwardBackwardDelegate.IsBound()) {
-		ForwardBackwardDelegate.Broadcast(Value);
+	float InputValue = Value.Get<float>();
+
+	if (InputValue > 0.0f) // Forward button pressed
+	{
+		bIsForwardPressed = true;
 	}
+	else if (InputValue < 0.0f) // Backward button pressed
+	{
+		bIsBackwardPressed = true;
+	}
+
+	UpdateCurrentFrontBackValue();
 }
+
 
 void APlatformPlayerController::PressSidewaysButtonButton(const FInputActionValue& Value)
 {
-	if (SidewayDelegate.IsBound()) {
-		SidewayDelegate.Broadcast(Value);
+	float InputValue = Value.Get<float>();
+
+	if (InputValue > 0.0f) // Forward button pressed
+	{
+		bIsMoveRightPressed = true;
 	}
+	else if (InputValue < 0.0f) // Backward button pressed
+	{
+		bIsMoveLeftPressed = true;
+	}
+
+	UpdateCurrentSideValue();
+
 }
 
 void APlatformPlayerController::PressRunButton()
 {
+
 	if (RunDelegate.IsBound()) {
 		RunDelegate.Broadcast();
 	}
 }
 
-void APlatformPlayerController::ReleaseMovementButton()
+void APlatformPlayerController::ReleaseForwardButton()
 {
-	if (StopDelegate.IsBound()) {
-		StopDelegate.Broadcast();
-	}
-
+	bIsForwardPressed = false;
+	UpdateCurrentFrontBackValue();
 }
 
+void APlatformPlayerController::ReleaseBackwardButton()
+{
+	bIsBackwardPressed = false;
+	UpdateCurrentFrontBackValue();
+}
+
+void APlatformPlayerController::ReleaseSidewayRight()
+{
+	bIsMoveRightPressed = false;
+	UpdateCurrentSideValue();
+}
+
+void APlatformPlayerController::ReleaseSideWayLeft()
+{
+	bIsMoveLeftPressed = false;
+	UpdateCurrentSideValue();
+}
+
+float APlatformPlayerController::GetCurrentFrontBackValue() const
+{
+	return CurrentFrontBackValue;
+}
+
+float APlatformPlayerController::GetCurrentSideValue() const
+{
+	return CurrentSideValue;
+}
+
+void APlatformPlayerController::UpdateCurrentFrontBackValue()
+{
+	if (bIsForwardPressed && bIsBackwardPressed)
+	{
+		CurrentFrontBackValue = 0.0f; // Cancel movement if both are pressed
+	}
+	else if (bIsForwardPressed)
+	{
+		CurrentFrontBackValue = 1.0f; // Move forward
+	}
+	else if (bIsBackwardPressed)
+	{
+		CurrentFrontBackValue = -1.0f; // Move backward
+	}
+	else
+	{
+		CurrentFrontBackValue = 0.0f; // Stop movement if neither is pressed
+	}
+}
+
+void APlatformPlayerController::UpdateCurrentSideValue()
+{
+	if (bIsMoveRightPressed && bIsMoveLeftPressed)
+	{
+		CurrentSideValue = 0.0f; // Cancel movement if both are pressed
+	}
+	else if (bIsMoveRightPressed)
+	{
+		CurrentSideValue = 1.0f; // Move forward
+	}
+	else if (bIsMoveLeftPressed)
+	{
+		CurrentSideValue = -1.0f; // Move backward
+	}
+	else
+	{
+		CurrentSideValue = 0.0f; // Stop movement if neither is presse
+	}
+	
+}
 
 void APlatformPlayerController::SetupInputComponent()
 {
@@ -57,16 +144,24 @@ void APlatformPlayerController::SetupInputComponent()
 		EnhancedInputComponent->BindAction(IA_JumpUp, ETriggerEvent::Triggered, this, &APlatformPlayerController::PressJumpButton);
 		EnhancedInputComponent->BindAction(IA_JumpUp, ETriggerEvent::Completed, this, &APlatformPlayerController::PressJumpButton);
 
-		//Moving
+		//Moving Forward
 		EnhancedInputComponent->BindAction(IA_MoveForward, ETriggerEvent::Triggered, this, &APlatformPlayerController::PressForwardBackwardButton);
-		EnhancedInputComponent->BindAction(IA_MoveForward, ETriggerEvent::Completed, this, &APlatformPlayerController::ReleaseMovementButton);
-		EnhancedInputComponent->BindAction(IA_MoveSideway, ETriggerEvent::Triggered, this, &APlatformPlayerController::PressSidewaysButtonButton);
-		EnhancedInputComponent->BindAction(IA_MoveSideway, ETriggerEvent::Completed, this, &APlatformPlayerController::ReleaseMovementButton);
+		EnhancedInputComponent->BindAction(IA_MoveForward, ETriggerEvent::Completed, this, &APlatformPlayerController::ReleaseForwardButton);
+		//Moving Back
+		EnhancedInputComponent->BindAction(IA_MoveBackward, ETriggerEvent::Triggered, this, &APlatformPlayerController::PressForwardBackwardButton);
+		EnhancedInputComponent->BindAction(IA_MoveBackward, ETriggerEvent::Completed, this, &APlatformPlayerController::ReleaseBackwardButton);
 
-		////movement modifiers
+		//Moving Right
+		EnhancedInputComponent->BindAction(IA_MoveSideway, ETriggerEvent::Triggered, this, &APlatformPlayerController::PressSidewaysButtonButton);
+		EnhancedInputComponent->BindAction(IA_MoveSideway, ETriggerEvent::Completed, this, &APlatformPlayerController::ReleaseSidewayRight);
+		
+		//Moving Left
+		EnhancedInputComponent->BindAction(IA_MoveSideLeft, ETriggerEvent::Triggered, this, &APlatformPlayerController::PressSidewaysButtonButton);
+		EnhancedInputComponent->BindAction(IA_MoveSideLeft, ETriggerEvent::Completed, this, &APlatformPlayerController::ReleaseSideWayLeft);
+
+		//movement modifiers
 		EnhancedInputComponent->BindAction(IA_Run, ETriggerEvent::Triggered, this, &APlatformPlayerController::PressRunButton);
 		//EnhancedInputComponent->BindAction(IA_Run, ETriggerEvent::Completed, &APlatformPlayerController::ReleaseMovementButton);
-
 	}
 }
 
@@ -75,7 +170,6 @@ void APlatformPlayerController::BeginPlay()
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = GetLocalPlayer()->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 	if (Subsystem)
 	{
-		// Add the input mapping context with priority 0
 		Subsystem->AddMappingContext(PlayerInputMap, 0);
 	}
 }
@@ -99,7 +193,12 @@ FRUNSIGNNATURE* APlatformPlayerController::GetRunDelegate()
 	return &RunDelegate;
 }
 
-FSTOPSIGNAUTURE* APlatformPlayerController::GetMoveXYStopDelegate()
+FSTOPFORWARDSIGNAUTURE* APlatformPlayerController::GetMoveForwardStopDelegate()
 {
-	return &StopDelegate;
+	return &StopForwardMovementDelegate;
+}
+
+FSTOPSIDESIGNAUTURE* APlatformPlayerController::GetMoveSideStopDelegate()
+{
+	return &StopSideMovementDelegate;
 }

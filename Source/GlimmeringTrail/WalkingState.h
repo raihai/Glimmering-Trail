@@ -19,21 +19,19 @@ public:
 protected:
 	virtual void OnEnterState(AActor* OwnerRef) override;
 	virtual void TickState(float DeltaTime) override;
-	virtual void HandleForwardBackwardMovement(const FInputActionValue& Value) override;
-	virtual void HandleSidewayMovment(const FInputActionValue& Value) override;
-	virtual void HandleStopXYMovment() override;
-	virtual void HandleJump() override;
+
+	virtual void OnExitState() override;
 
 private:
 
 	FVector GetAirResistance();
 
-	float WalkForce = 300;
-	float FrontBackValue = 0;
-	float SideValue = 0;
+	float WalkForce = 30000;
 	float DragCoefficient = 25;
-	FVector m_Velocity;
 
+	FVector m_Velocity;
+	
 	bool bQuickStop = false;
+
 	
 };
