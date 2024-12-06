@@ -53,7 +53,6 @@ void UPlayerStateBase::HandleJump()
 {
 	float g = (2 * 300) / (0.44 * 0.44);
 
-
 	if (!PlayerRef->IsGrounded())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Cannot jump while already airborne"));
@@ -67,7 +66,6 @@ void UPlayerStateBase::HandleJump()
 	
 	if (PlayerInterface)
 	{
-		
 		// Calculate horizontal velocity based on input values
 		horizontalVelocity += PlayerRef->GetActorForwardVector() * PlayerController->CurrentFrontBackValue * 200.0f; // Adjust multiplier as needed
 		horizontalVelocity += PlayerRef->GetActorRightVector() * PlayerController->CurrentSideValue * 200.0f;

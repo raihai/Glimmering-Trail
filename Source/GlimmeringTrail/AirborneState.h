@@ -27,5 +27,7 @@ private:
 	
 	
 	float gravity = 2 * 300 * 5.165;
+	bool bIsFallingFromLedge;
+	float FallTime;
 	
 };

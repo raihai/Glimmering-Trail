@@ -14,15 +14,13 @@ void UWalkingState::TickState(float DeltaTime)
 
 	//************ ensure that the gravity is always pusing down 
 	if (PlayerController->CurrentFrontBackValue == 0.0f && PlayerController->CurrentSideValue == 0.0f && m_Velocity.SizeSquared() < SMALL_NUMBER) {
-		
 		PlayerRef->StateManager->SwitchStateByKey("Grounded");
 		return;
 	}
 
 	FHitResult checkBelowPlayer;
-	if (IsGrounded(checkBelowPlayer)) {
-
-		PlayerRef->StateManager->SwitchStateByKey("Airborne");
+	if (!IsGrounded(checkBelowPlayer)) {
+		PlayerRef->StateManager->SwitchStateByKey("Air");
 		return;
 	}
 	
@@ -40,10 +38,8 @@ void UWalkingState::TickState(float DeltaTime)
 	FVector acceleration = force / 50;
 	m_Velocity = acceleration * DeltaTime;
 
-
 	PlayerRef->PlayerMoveComponent->Velocity = m_Velocity;
 	FHitResult hitResult;
-
 	PlayerRef->AddActorWorldOffset(m_Velocity, true, &hitResult);
 }
 
