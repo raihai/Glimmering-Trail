@@ -6,79 +6,52 @@
 void USlidingState::OnEnterState(AActor* OwnerRef)
 {
 	Super::OnEnterState(OwnerRef);
-	bCurrentlySliding = true;
+	UE_LOG(LogTemp, Warning, TEXT("Entering Sliding State"));
 }
 
 void USlidingState::TickState(float DeltaTime)
 {
 	Super::TickState(DeltaTime);
 
-	// need vector perpendicular to the surface normal
-
 	FHitResult hitResult;
 	IsGrounded(hitResult);
 	FVector surfaceNormal = hitResult.ImpactNormal;
-	FVector gravity = PlayerRef->GetActorUpVector();
-	FVector slideDirection = gravity - (FVector::DotProduct(gravity, surfaceNormal) / (surfaceNormal.Size() * surfaceNormal.Size())) * surfaceNormal; // vector projection onto plane
-	slideDirection.Normalize();
 
-	if (TestFunc(surfaceNormal)) {
-		DrawDebugLine(GetWorld(), hitResult.Location, hitResult.Location + (-slideDirection * 200), FColor::Purple, false, 10.0f, 0, 1.0f);
-		
-		//PlayerRef->PlayerMoveComponent->Velocity = FVector::ZeroVector;
-	
-		FVector Translation = -slideDirection * DeltaTime * 200;
-		PlayerRef->PlayerMoveComponent->Velocity = Translation;
-
-		PlayerRef->AddActorWorldOffset(Translation, true, &hitResult);
-
-	}
-	else {
+	if (!SlopeCheck(surfaceNormal)) {
 		PlayerRef->PlayerMoveComponent->Velocity = FVector::ZeroVector;
 		PlayerRef->StateManager->SwitchStateByKey("Grounded");
+		return;
 	}
 
-
+	MovePlayerAlongSlope(surfaceNormal, hitResult, DeltaTime);
 }
 
-//void USlidingState::HandleForwardBackwardMovement(const FInputActionValue& Value)
-//{
-//	Super::HandleForwardBackwardMovement(Value);
-//	FrontBackValue = Value.Get<float>();
-//}
-//
-//void USlidingState::HandleSidewayMovement(const FInputActionValue& Value)
-//{
-//	Super::HandleForwardBackwardMovement(Value);
-//	FrontBackValue = Value.Get<float>();
-//}
+void USlidingState::OnExitState()
+{
+	Super::OnExitState();
+	UE_LOG(LogTemp, Warning, TEXT("Slide State leaving Velocity: %s "), *PlayerRef->PlayerMoveComponent->Velocity.ToString());
+}
 
-//void USlidingState::HandleStopXYMovment()
-//{
-//	bQuickStop = true;
-//	FrontBackValue = 0;
-//	SideValue = 0;
-//}
-//
-//void USlidingState::HandleJump()
-//{
-//	Super::HandleJump();
-//	PlayerRef->StateManager->SwitchStateByKey("Air");
-//
-//}
-
-bool USlidingState::TestFunc(FVector& Normal)
+void USlidingState::MovePlayerAlongSlope(const FVector& SurfaceNormal, FHitResult& HitRes, float deltaTime)
 {
 	FVector playerUpVec = PlayerRef->GetActorUpVector();
-	float cosValue = FVector::DotProduct(playerUpVec, Normal) / (playerUpVec.Size() * Normal.Size());
+	FVector slideDirection = playerUpVec - (FVector::DotProduct(playerUpVec, SurfaceNormal) / (SurfaceNormal.Size() * SurfaceNormal.Size())) * SurfaceNormal; // vector projection onto plane
+	slideDirection.Normalize();
 
-	double angleInDegree = FMath::RadiansToDegrees(acos(cosValue));
+	FVector slopeRightVec = FVector::CrossProduct(SurfaceNormal, slideDirection).GetSafeNormal(); // Due to the right handness nature of cross product, when we a cross product on the opposite slope
+	float d = (float)FVector::DotProduct(PlayerRef->GetActorForwardVector(), slopeRightVec);
 
-	if (angleInDegree > 10.0f) {
+	if (d < 0) slopeRightVec = -slopeRightVec;
 
-		GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("No walkable surface detected, sliding down"));
-		return true;
-	}
-	return false;
+	FVector downwardForce;
+	if (PlayerController->CurrentFrontBackValue) downwardForce = slideDirection * -400.0f;
+	else downwardForce = slideDirection * -1000.0f;
 
+	FVector inputMovement = slopeRightVec * PlayerController->CurrentFrontBackValue * 800.0f;
+	FVector totalMovement = downwardForce + inputMovement;
+	totalMovement *= deltaTime;
+
+	PlayerRef->PlayerMoveComponent->Velocity = totalMovement;
+	PlayerRef->AddActorWorldOffset(totalMovement, true, &HitRes);
 }
+

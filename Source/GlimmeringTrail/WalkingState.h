@@ -19,10 +19,12 @@ public:
 protected:
 	virtual void OnEnterState(AActor* OwnerRef) override;
 	virtual void TickState(float DeltaTime) override;
-
 	virtual void OnExitState() override;
 
 private:
+
+	void MovePlayer(FHitResult& hitresult, float DeltaTime);
+	void MovePlayerUpSlope(FHitResult& hitresult, float DeltaTime);
 
 	FVector GetAirResistance();
 
@@ -30,8 +32,5 @@ private:
 	float DragCoefficient = 25;
 
 	FVector m_Velocity;
-	
-	bool bQuickStop = false;
-
 	
 };

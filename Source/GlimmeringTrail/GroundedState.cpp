@@ -13,22 +13,35 @@ void UGroundedState::OnEnterState(AActor* OwnerRef)
 {
 	Super::OnEnterState(OwnerRef);
 
+	UE_LOG(LogTemp, Warning, TEXT("Entering Grounded State"));
+
 	if (!FMath::IsNearlyZero(PlayerController->CurrentFrontBackValue) || !FMath::IsNearlyZero(PlayerController->CurrentSideValue))
 	{
 		PlayerRef->StateManager->SwitchStateByKey("Walking");
+		return;
 	}
-
 }
 
 void UGroundedState::TickState(float DeltaTime)
 {
 	Super::TickState(DeltaTime);
+
+	FHitResult checkBelowPlayer;
+	IsGrounded(checkBelowPlayer);
+
+	if (SlopeCheck(checkBelowPlayer.ImpactNormal)) {
+		UE_LOG(LogTemp, Warning, TEXT("There is a slope"));
+		PlayerRef->StateManager->SwitchStateByKey("Sliding");
+		return;
+	}
 	
 	if (!FMath::IsNearlyZero(PlayerController->CurrentFrontBackValue) && !FMath::IsNearlyZero(PlayerController->CurrentSideValue)) {
 		PlayerRef->StateManager->SwitchStateByKey("Walking");
+		return;
 	}
 	else {
 		PlayerRef->StateManager->SwitchStateByKey("Idle");
+		return;
 	}
 
 }
@@ -37,5 +50,7 @@ void UGroundedState::TickState(float DeltaTime)
 void UGroundedState::OnExitState()
 {
 	Super::OnExitState();
+
+	UE_LOG(LogTemp, Warning, TEXT("lEAVING Grounded Velocity: %s"), *PlayerRef->PlayerMoveComponent->Velocity.ToString());
 	
 }

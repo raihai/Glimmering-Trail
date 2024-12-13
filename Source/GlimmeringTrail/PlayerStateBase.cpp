@@ -14,7 +14,6 @@ void UPlayerStateBase::OnEnterState(AActor* OwnerRef)
 
 	if (!PlayerController)
 	{
-		// Get the PlayerController and cast it to the interface
 		PlayerController = Cast<APlatformPlayerController>(UGameplayStatics::GetPlayerController(this, 0));
 	}
 
@@ -24,10 +23,8 @@ void UPlayerStateBase::OnEnterState(AActor* OwnerRef)
 	
 	if (PlayerInterface) {
 		PlayerInterface->GetJumpDelegate()->AddUObject(this, &UPlayerStateBase::HandleJump); // add func to delegate
-		
 		PlayerInterface->GetRunDelegate()->AddUObject(this, &UPlayerStateBase::UPlayerStateBase::HandleRunning);
-	
-		
+
 	}
 }
 
@@ -77,7 +74,7 @@ void UPlayerStateBase::HandleJump()
 	// Set the new velocity
 	PlayerRef->PlayerMoveComponent->Velocity = currVelocity;
 
-	UE_LOG(LogTemp, Warning, TEXT("Jump initiated with velocity: %s"), *currVelocity.ToString());
+	//UE_LOG(LogTemp, Warning, TEXT("Jump initiated with velocity: %s"), *currVelocity.ToString());
 	PlayerRef->StateManager->SwitchStateByKey("Air");
 }
 
@@ -119,15 +116,19 @@ bool UPlayerStateBase::SlopeCheck(FVector& ImpactNormal)
 {
 	// find the angle between the player down vec and impact surface normal 
 
-	FVector playerUpVec = PlayerRef->GetActorUpVector();
-	float cosValue = FVector::DotProduct(playerUpVec, ImpactNormal) / (playerUpVec.Size() * ImpactNormal.Size());
+	FVector playerUpVec = PlayerRef->GetActorUpVector().GetSafeNormal();
+	FVector impactNormal = ImpactNormal.GetSafeNormal();
+	float cosValue = FVector::DotProduct(playerUpVec, impactNormal);
 
 	double angleInDegree = FMath::RadiansToDegrees(acos(cosValue));
 
-	if (angleInDegree > 30.0f) {
+	GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Yellow, FString::Printf(TEXT("Slope angle: %f"), angleInDegree));
 
-		GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("No walkable surface detected, sliding down"));
+	if (angleInDegree > 31.0f) {
+
+		GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("Too Steep, sliding down"));
 		return true;
 	}
+
 	return false;
 }

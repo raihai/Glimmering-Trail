@@ -29,7 +29,4 @@ protected:
 
 private:
 
-	bool bIsJumping = false;
-	float m_FValue;
-	float m_SValue;
 };
