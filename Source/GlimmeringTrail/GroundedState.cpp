@@ -35,15 +35,10 @@ void UGroundedState::TickState(float DeltaTime)
 		return;
 	}
 	
-	if (!FMath::IsNearlyZero(PlayerController->CurrentFrontBackValue) && !FMath::IsNearlyZero(PlayerController->CurrentSideValue)) {
+	if (!FMath::IsNearlyZero(PlayerController->CurrentFrontBackValue) || !FMath::IsNearlyZero(PlayerController->CurrentSideValue)) {
 		PlayerRef->StateManager->SwitchStateByKey("Walking");
 		return;
 	}
-	else {
-		PlayerRef->StateManager->SwitchStateByKey("Idle");
-		return;
-	}
-
 }
 
 

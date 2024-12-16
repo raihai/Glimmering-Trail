@@ -124,7 +124,7 @@ bool UPlayerStateBase::SlopeCheck(FVector& ImpactNormal)
 
 	GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Yellow, FString::Printf(TEXT("Slope angle: %f"), angleInDegree));
 
-	if (angleInDegree > 31.0f) {
+	if (angleInDegree >= 30.0f && angleInDegree < 85) {
 
 		GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("Too Steep, sliding down"));
 		return true;
