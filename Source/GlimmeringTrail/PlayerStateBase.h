@@ -33,6 +33,7 @@ protected:
 	virtual void HandleRunning();
 	
 	virtual bool IsGrounded(FHitResult& HitResult);
+	virtual bool IsGroundedRay(FHitResult& HitResult);
 	virtual bool SlopeCheck(FVector& ImpactNormal); 
 	
 	float FrontBackValue = 0;

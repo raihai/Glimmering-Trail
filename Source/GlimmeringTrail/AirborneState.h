@@ -24,10 +24,13 @@ protected:
 	virtual void OnExitState() override;
 
 private:
-	void IsFallingFromLedge(float deltaTime);
-	void FallingMovement(float DelaTime);
+	void IsFallingFromLedge(FHitResult& hitResult, float deltaTime);
+	void FallingMovement(FHitResult& HitResult, float DelaTime);
+	bool OnEdgeCheck(FHitResult& hitres);
+	void MoveOnEdgePlayer(FVector& normal, float DeltTime);
 
 	FVector m_Velocity;
+	FVector m_LedgeNormal;
 	float gravity = 2 * 300 * 5.165;
 	bool bIsFallingFromLedge;
 	

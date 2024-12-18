@@ -50,31 +50,23 @@ void UPlayerStateBase::HandleJump()
 {
 	float g = (2 * 300) / (0.44 * 0.44);
 
-	if (!PlayerRef->IsGrounded())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Cannot jump while already airborne"));
-		return;
-	}
-
-	float jumpHeight = 300.0f; // Customize as needed
+	float jumpHeight = 300.0f;
 	float jumpVelocity = FMath::Sqrt(2 * g * jumpHeight);
 
 	FVector horizontalVelocity = FVector::ZeroVector;
 	
 	if (PlayerInterface)
 	{
-		// Calculate horizontal velocity based on input values
-		horizontalVelocity += PlayerRef->GetActorForwardVector() * PlayerController->CurrentFrontBackValue * 200.0f; // Adjust multiplier as needed
+		
+		horizontalVelocity += PlayerRef->GetActorForwardVector() * PlayerController->CurrentFrontBackValue * 200.0f; 
 		horizontalVelocity += PlayerRef->GetActorRightVector() * PlayerController->CurrentSideValue * 200.0f;
 	}
 
 	FVector currVelocity = horizontalVelocity;
 	currVelocity.Z = jumpVelocity;
 
-	// Set the new velocity
 	PlayerRef->PlayerMoveComponent->Velocity = currVelocity;
 
-	//UE_LOG(LogTemp, Warning, TEXT("Jump initiated with velocity: %s"), *currVelocity.ToString());
 	PlayerRef->StateManager->SwitchStateByKey("Air");
 }
 
@@ -87,26 +79,76 @@ void UPlayerStateBase::HandleRunning()
 
 bool UPlayerStateBase::IsGrounded(FHitResult& HitResult)
 {
-	/*FHitResult hitResult;*/
-	FVector startLocation = PlayerRef->GetActorLocation();
-	FVector endLocation = startLocation - FVector(0, 0, 100.0f);
-	float sphereRadius = 34.0f;
+	//FVector playerLocation = PlayerRef->GetActorLocation();
+	//FVector startLocation = playerLocation;
+	//FVector endLocation = playerLocation - FVector(0, 0, 110.0f); // Slightly below capsule
+
+	//FCollisionQueryParams CollisionParams;
+	//CollisionParams.AddIgnoredActor(PlayerRef);
+
+	//bool bHit = GetWorld()->LineTraceSingleByChannel(
+	//	HitResult,
+	//	startLocation,
+	//	endLocation,
+	//	ECC_Visibility,
+	//	CollisionParams
+	//);
+
+	//DrawDebugLine(GetWorld(), startLocation, endLocation, bHit ? FColor::Green : FColor::Red, false, 1.0f, 0, 1.0f);
+
+	//return bHit && FVector::DotProduct(HitResult.ImpactNormal, PlayerRef->GetActorUpVector()) > 0.86f; 
+
+	FVector playerLocation = PlayerRef->GetActorLocation();
+
+	
+	FVector startLocation = playerLocation -  FVector(0, 0, 80.0f);
+	FVector endLocation = startLocation - FVector(0, 0, 20.0f); 
+
+	FVector BoxExtent(40.0f, 40.0f, 10.0f);
 
 	FCollisionQueryParams CollisionParams;
-	CollisionParams.AddIgnoredActor(PlayerRef); // Ignore the player itself in the raycast
+	CollisionParams.AddIgnoredActor(PlayerRef);
 
-	bool bHit = GetWorld()->SweepSingleByChannel(HitResult,
+	bool bHit = GetWorld()->SweepSingleByChannel(
+		HitResult,
 		startLocation,
 		endLocation,
 		FQuat::Identity,
 		ECC_Visibility,
-		FCollisionShape::MakeSphere(sphereRadius),
-		CollisionParams)
-		;
+		FCollisionShape::MakeBox(BoxExtent),
+		CollisionParams
+	);
 
-	/*DrawDebugSphere(GetWorld(), startLocation, sphereRadius, 12, FColor::Blue, false, 0.5f);
-	DrawDebugSphere(GetWorld(), endLocation, sphereRadius, 12, FColor::Red, false, 0.5f);*/
-	//DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Red, false, 10.0f, 0, 5.0f);
+	
+	//DrawDebugBox(
+	//	GetWorld(),
+	//	(startLocation + endLocation) * 0.5f, 
+	//	BoxExtent,
+	//	FQuat::Identity,
+	//	bHit ? FColor::Green : FColor::Red,
+	//	false,
+	//	1.0f
+	//);
+
+	return bHit;
+}
+
+bool UPlayerStateBase::IsGroundedRay(FHitResult& HitResult)
+{
+	FVector playerLocation = PlayerRef->GetActorLocation();
+	
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(PlayerRef); 
+
+	FVector startLocation = playerLocation;
+	FVector endLocation = startLocation - FVector(0, 0, 110.0f);
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,		
+		startLocation,	
+		endLocation,
+		ECC_Visibility,
+		CollisionParams
+		);
 
 	return bHit;
 
