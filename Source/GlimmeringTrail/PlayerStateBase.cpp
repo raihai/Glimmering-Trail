@@ -79,24 +79,7 @@ void UPlayerStateBase::HandleRunning()
 
 bool UPlayerStateBase::IsGrounded(FHitResult& HitResult)
 {
-	//FVector playerLocation = PlayerRef->GetActorLocation();
-	//FVector startLocation = playerLocation;
-	//FVector endLocation = playerLocation - FVector(0, 0, 110.0f); // Slightly below capsule
-
-	//FCollisionQueryParams CollisionParams;
-	//CollisionParams.AddIgnoredActor(PlayerRef);
-
-	//bool bHit = GetWorld()->LineTraceSingleByChannel(
-	//	HitResult,
-	//	startLocation,
-	//	endLocation,
-	//	ECC_Visibility,
-	//	CollisionParams
-	//);
-
-	//DrawDebugLine(GetWorld(), startLocation, endLocation, bHit ? FColor::Green : FColor::Red, false, 1.0f, 0, 1.0f);
-
-	//return bHit && FVector::DotProduct(HitResult.ImpactNormal, PlayerRef->GetActorUpVector()) > 0.86f; 
+	
 
 	FVector playerLocation = PlayerRef->GetActorLocation();
 
@@ -104,7 +87,7 @@ bool UPlayerStateBase::IsGrounded(FHitResult& HitResult)
 	FVector startLocation = playerLocation -  FVector(0, 0, 80.0f);
 	FVector endLocation = startLocation - FVector(0, 0, 20.0f); 
 
-	FVector BoxExtent(40.0f, 40.0f, 10.0f);
+	FVector BoxExtent(40.0f, 40.0f, 20.0f);
 
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(PlayerRef);
@@ -120,38 +103,78 @@ bool UPlayerStateBase::IsGrounded(FHitResult& HitResult)
 	);
 
 	
-	//DrawDebugBox(
-	//	GetWorld(),
-	//	(startLocation + endLocation) * 0.5f, 
-	//	BoxExtent,
-	//	FQuat::Identity,
-	//	bHit ? FColor::Green : FColor::Red,
-	//	false,
-	//	1.0f
-	//);
+	DrawDebugBox(
+		GetWorld(),
+		(startLocation + endLocation) * 0.5f, 
+		BoxExtent,
+		FQuat::Identity,
+		bHit ? FColor::Green : FColor::Red,
+		false,
+		1.0f
+	);
 
 	return bHit;
 }
 
-bool UPlayerStateBase::IsGroundedRay(FHitResult& HitResult)
+bool UPlayerStateBase::IsGroundedSlide(FHitResult& HitResult)
 {
-	FVector playerLocation = PlayerRef->GetActorLocation();
-	
-	FCollisionQueryParams CollisionParams;
-	CollisionParams.AddIgnoredActor(PlayerRef); 
+	/*FHitResult hitResult;*/
+	FVector startLocation = PlayerRef->GetActorLocation();
+	FVector endLocation = startLocation - FVector(0, 0, 100.0f);
+	float sphereRadius = 40.0f;
 
-	FVector startLocation = playerLocation;
-	FVector endLocation = startLocation - FVector(0, 0, 110.0f);
-	bool bHit = GetWorld()->LineTraceSingleByChannel(
-		HitResult,		
-		startLocation,	
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(PlayerRef); // Ignore the player itself in the raycast
+
+	bool bHit = GetWorld()->SweepSingleByChannel(HitResult,
+		startLocation,
 		endLocation,
+		FQuat::Identity,
 		ECC_Visibility,
-		CollisionParams
-		);
+		FCollisionShape::MakeSphere(sphereRadius),
+		CollisionParams)
+		;
+
+	/*DrawDebugSphere(GetWorld(), startLocation, sphereRadius, 12, FColor::Blue, false, 0.5f);
+	DrawDebugSphere(GetWorld(), endLocation, sphereRadius, 12, FColor::Red, false, 0.5f);*/
+	//DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Red, false, 10.0f, 0, 5.0f);
 
 	return bHit;
 
+}
+
+bool UPlayerStateBase::IsGroundedOnSlope(FHitResult& HitResult)
+{
+	FVector playerLocation = PlayerRef->GetActorLocation();
+	
+	
+	FVector startLocation = PlayerRef->GetActorLocation();
+	FVector endLocation = startLocation - FVector(0, 0, 100.0f);
+	float sphereRadius = 40.0f;
+
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(PlayerRef); // Ignore the player itself in the raycast
+
+	bool bHit = GetWorld()->SweepSingleByChannel(HitResult,
+		startLocation,
+		endLocation,
+		FQuat::Identity,
+		ECC_Visibility,
+		FCollisionShape::MakeSphere(sphereRadius),
+		CollisionParams)
+		;
+
+	DrawDebugSphere(GetWorld(), startLocation, sphereRadius, 12, FColor::Blue, false, 0.5f);
+	DrawDebugSphere(GetWorld(), endLocation, sphereRadius, 12, FColor::Red, false, 0.5f);
+
+	//if (bHit && SlopeCheck(HitResult.ImpactNormal))
+	//{
+	//	// Slope is too steep
+	//	GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("Steep slope detected in  Grounded On Slope Check."));
+	//	return true;
+	//}
+
+	return bHit;
 }
 
 bool UPlayerStateBase::SlopeCheck(FVector& ImpactNormal)

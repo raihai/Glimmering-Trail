@@ -29,6 +29,7 @@ private:
 	FVector GetAirResistance();
 
 	float WalkForce = 30000;
+	float halfWalkForce = 20000;
 	float DragCoefficient = 25;
 
 	FVector m_Velocity;

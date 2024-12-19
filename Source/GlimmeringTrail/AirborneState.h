@@ -27,11 +27,15 @@ private:
 	void IsFallingFromLedge(FHitResult& hitResult, float deltaTime);
 	void FallingMovement(FHitResult& HitResult, float DelaTime);
 	bool OnEdgeCheck(FHitResult& hitres);
-	void MoveOnEdgePlayer(FVector& normal, float DeltTime);
+	
+	void ClampHorizontalVelocity(FVector& Velocity, float MaxHorizontalSpeed);
 
 	FVector m_Velocity;
 	FVector m_LedgeNormal;
 	float gravity = 2 * 300 * 5.165;
 	bool bIsFallingFromLedge;
+	bool bSlopeEdge;
+
+	float maxHorizontalHeight = 700.0f;
 	
 };

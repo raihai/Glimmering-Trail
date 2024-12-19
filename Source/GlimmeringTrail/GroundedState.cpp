@@ -27,7 +27,7 @@ void UGroundedState::TickState(float DeltaTime)
 	Super::TickState(DeltaTime);
 
 	FHitResult checkBelowPlayer;
-	IsGrounded(checkBelowPlayer);
+	IsGroundedSlide(checkBelowPlayer);
 
 	if (SlopeCheck(checkBelowPlayer.ImpactNormal)) {
 		UE_LOG(LogTemp, Warning, TEXT("There is a slope"));

@@ -47,8 +47,22 @@ void UWalkingState::MovePlayer(FHitResult& hitResult, float deltaTime)
 	FVector force = FVector::ZeroVector;
 	FVector impactNormal = hitResult.ImpactNormal.GetSafeNormal();
 
-	force += FVector::VectorPlaneProject(PlayerRef->GetActorForwardVector(), impactNormal).GetSafeNormal() * WalkForce  * PlayerController->CurrentFrontBackValue;
-	force += FVector::VectorPlaneProject(PlayerRef->GetActorRightVector(), impactNormal).GetSafeNormal() * WalkForce * PlayerController->CurrentSideValue;
+	if (FMath::Abs(PlayerController->CurrentFrontBackValue) == FMath::Abs(PlayerController->CurrentSideValue)) {
+		force += FVector::VectorPlaneProject(PlayerRef->GetActorForwardVector(), impactNormal).GetSafeNormal() * halfWalkForce * PlayerController->CurrentFrontBackValue;
+		force += FVector::VectorPlaneProject(PlayerRef->GetActorRightVector(), impactNormal).GetSafeNormal() * halfWalkForce * PlayerController->CurrentSideValue;
+	}
+	else {
+		force += FVector::VectorPlaneProject(PlayerRef->GetActorForwardVector(), impactNormal).GetSafeNormal() * WalkForce * PlayerController->CurrentFrontBackValue;
+		force += FVector::VectorPlaneProject(PlayerRef->GetActorRightVector(), impactNormal).GetSafeNormal() * WalkForce * PlayerController->CurrentSideValue;
+	}
+	
+	//float inputMagnitude = FMath::Sqrt(FMath::Square(PlayerController->CurrentFrontBackValue) + FMath::Square(PlayerController->CurrentSideValue));
+	//if (inputMagnitude > 1.0f) {
+	//	PlayerController->CurrentFrontBackValue /= inputMagnitude;
+	//	PlayerController->CurrentSideValue /= inputMagnitude;
+	//}
+
+
 	force += GetAirResistance();
 	
 	FVector acceleration = force / 50;

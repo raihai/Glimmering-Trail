@@ -25,5 +25,5 @@ protected:
 private:
 
 	void MovePlayerAlongSlope(const FVector& SurfaceNormal, FHitResult& HitRes, float dt); 
-
+	
 };

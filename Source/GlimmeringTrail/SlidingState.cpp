@@ -14,10 +14,10 @@ void USlidingState::TickState(float DeltaTime)
 	Super::TickState(DeltaTime);
 
 	FHitResult hitResult;
-	IsGrounded(hitResult);
+	IsGroundedSlide(hitResult);
 	FVector surfaceNormal = hitResult.ImpactNormal;
 
-	if (!SlopeCheck(surfaceNormal)) {
+	if (!SlopeCheck(surfaceNormal) ) {
 		PlayerRef->PlayerMoveComponent->Velocity = FVector::ZeroVector;
 		PlayerRef->StateManager->SwitchStateByKey("Grounded");
 		return;
