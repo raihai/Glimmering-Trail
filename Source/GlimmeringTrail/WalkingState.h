@@ -27,6 +27,7 @@ private:
 	/*void MovePlayerUpSlope(FHitResult& hitresult, float DeltaTime);*/
 
 	FVector GetAirResistance();
+	bool testFunc(FHitResult& hitResult);
 
 	float WalkForce = 30000;
 	float halfWalkForce = 20000;

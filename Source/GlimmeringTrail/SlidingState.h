@@ -20,10 +20,7 @@ protected:
 	virtual void OnEnterState(AActor* OwnerRef) override;
 	virtual void TickState(float DeltaTime) override;
 	virtual void OnExitState() override;
-	
 
 private:
-
 	void MovePlayerAlongSlope(const FVector& SurfaceNormal, FHitResult& HitRes, float dt); 
-	
 };

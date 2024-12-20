@@ -14,7 +14,9 @@ void UWalkingState::TickState(float DeltaTime)
 	Super::TickState(DeltaTime);
 
 	FHitResult checkBelowPlayer;
-	if (!IsGrounded(checkBelowPlayer)) {
+
+	if (testFunc(checkBelowPlayer)) { // ledge check
+		FallingFromLedge = true;
 		PlayerRef->StateManager->SwitchStateByKey("Air");
 		return;
 	}
@@ -24,7 +26,7 @@ void UWalkingState::TickState(float DeltaTime)
 		return;
 	}
 
-	if (checkBelowPlayer.bBlockingHit && SlopeCheck(checkBelowPlayer.ImpactNormal)) {
+	if (checkBelowPlayer.bBlockingHit && SlopeCheck(checkBelowPlayer.ImpactNormal) ) {
 		PlayerRef->StateManager->SwitchStateByKey("Sliding");
 		return;
 	} 
@@ -55,13 +57,6 @@ void UWalkingState::MovePlayer(FHitResult& hitResult, float deltaTime)
 		force += FVector::VectorPlaneProject(PlayerRef->GetActorForwardVector(), impactNormal).GetSafeNormal() * WalkForce * PlayerController->CurrentFrontBackValue;
 		force += FVector::VectorPlaneProject(PlayerRef->GetActorRightVector(), impactNormal).GetSafeNormal() * WalkForce * PlayerController->CurrentSideValue;
 	}
-	
-	//float inputMagnitude = FMath::Sqrt(FMath::Square(PlayerController->CurrentFrontBackValue) + FMath::Square(PlayerController->CurrentSideValue));
-	//if (inputMagnitude > 1.0f) {
-	//	PlayerController->CurrentFrontBackValue /= inputMagnitude;
-	//	PlayerController->CurrentSideValue /= inputMagnitude;
-	//}
-
 
 	force += GetAirResistance();
 	
@@ -108,6 +103,64 @@ void UWalkingState::MovePlayer(FHitResult& hitResult, float deltaTime)
 FVector UWalkingState::GetAirResistance()
 {
 	return -m_Velocity.GetSafeNormal() * m_Velocity.SizeSquared() * DragCoefficient;
+}
+
+bool UWalkingState::testFunc(FHitResult& hitResult)
+{
+	
+		FVector belowPlayerLocation = PlayerRef->GetActorLocation() - FVector(0, 0, 80.0f); // Bottom of capsule
+		FVector offsets[] = {
+			FVector(50, 0, 0),
+			FVector(-50, 0, 0),
+			FVector(0, 50, 0),
+			FVector(0, -50, 0)
+		};
+
+		FVector fallOffsets[] = {
+			FVector(30, 0, 0),
+			FVector(-30, 0, 0),
+			FVector(0, 30, 0),
+			FVector(0, -30, 0)
+		};
+
+		bool bStandHits[4] = { false, false, false, false };
+		bool bFallHits[4] = { false, false, false, false };
+
+		FCollisionQueryParams CollisionParams;
+		CollisionParams.AddIgnoredActor(PlayerRef);
+
+		int missedStandRays = 0;
+		int missedFallRays = 0;
+
+		for (int32 i = 0; i < 4; ++i) {
+			FVector standStart = belowPlayerLocation + offsets[i];
+			FVector standEnd = standStart - FVector(0, 0, 100.0f);
+
+			FVector fallStart = belowPlayerLocation + fallOffsets[i];
+			FVector fallEnd = fallStart - FVector(0, 0, 100.0f);
+
+			bStandHits[i] = GetWorld()->LineTraceSingleByChannel(hitResult, standStart, standEnd, ECC_Visibility, CollisionParams); // stand
+			DrawDebugLine(GetWorld(), standStart, standEnd, bStandHits[i] ? FColor::Green : FColor::Purple, false, 10.0f, 0, 1.0f);
+
+			bFallHits[i] = GetWorld()->LineTraceSingleByChannel(hitResult, fallStart, fallEnd, ECC_Visibility, CollisionParams); // fall 
+			DrawDebugLine(GetWorld(), fallStart, fallEnd, bFallHits[i] ? FColor::Red : FColor::Blue, false, 10.0f, 0, 1.0f);
+
+			if (!bStandHits[i]) missedStandRays += 1;
+			if (!bFallHits[i]) missedFallRays += 1;
+		}
+
+
+		
+		if ((missedStandRays >= 3) && (missedFallRays == 4) ) {
+
+			for (int i = 0; i < 4; i++) {
+				if (bStandHits[i] == false && bFallHits[i] == false) {
+					return true;
+				}
+			}
+		}
+		return false;
+
 }
 
 

@@ -3,6 +3,8 @@
 #include "PlayerStateBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyPlayerInterface.h"
+#include "Components/CapsuleComponent.h"
+
 
 void UPlayerStateBase::OnEnterState(AActor* OwnerRef)
 {
@@ -79,15 +81,13 @@ void UPlayerStateBase::HandleRunning()
 
 bool UPlayerStateBase::IsGrounded(FHitResult& HitResult)
 {
-	
-
 	FVector playerLocation = PlayerRef->GetActorLocation();
 
 	
 	FVector startLocation = playerLocation -  FVector(0, 0, 80.0f);
 	FVector endLocation = startLocation - FVector(0, 0, 20.0f); 
 
-	FVector BoxExtent(40.0f, 40.0f, 20.0f);
+	FVector BoxExtent(10.0f, 10.0f, 20.0f);
 
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(PlayerRef);
@@ -114,6 +114,62 @@ bool UPlayerStateBase::IsGrounded(FHitResult& HitResult)
 	);
 
 	return bHit;
+
+	// Get player location and capsule dimensions
+	//FVector playerLocation = PlayerRef->GetActorLocation();
+
+	//float capsuleRadius = 40;
+	//float capsuleHalfHeight = 100;
+
+	// Define sweep start and end based on the capsule's bottom
+	//FVector startLocation = playerLocation - FVector(0, 0, capsuleHalfHeight - capsuleRadius); // Bottom of capsule
+	//FVector endLocation = startLocation - FVector(0, 0, 50.0f); // Adjust sweep depth as needed
+
+	// Set up collision query parameters
+	//FCollisionQueryParams CollisionParams;
+	//CollisionParams.AddIgnoredActor(PlayerRef);
+
+	// Perform the sweep using a smaller sphere to simulate grounded checks
+	//float sphereRadius = capsuleRadius * 0.9f; // Slightly smaller than the capsule radius
+	//bool bHit = GetWorld()->SweepSingleByChannel(
+	//	HitResult,
+	//	startLocation,
+	//	endLocation,
+	//	FQuat::Identity,
+	//	ECC_Visibility,
+	//	FCollisionShape::MakeSphere(sphereRadius),
+	//	CollisionParams
+	//);
+
+	// Visual debug
+	//DrawDebugCapsule(
+	//	GetWorld(),
+	//	(startLocation + endLocation) * 0.5f,
+	//	capsuleHalfHeight,
+	//	capsuleRadius,
+	//	FQuat::Identity,
+	//	bHit ? FColor::Green : FColor::Red,
+	//	false,
+	//	1.0f
+	//);
+
+	//// Additional checks for steep slopes or edges
+	//if (bHit)
+	//{
+	//	FVector groundNormal = HitResult.ImpactNormal.GetSafeNormal();
+	//	FVector playerUp = PlayerRef->GetActorUpVector();
+
+	//	// Check slope angle
+	//	float cosValue = FVector::DotProduct(playerUp, groundNormal);
+	//	double angleInDegrees = FMath::RadiansToDegrees(FMath::Acos(cosValue));
+
+	//	if (angleInDegrees > 30.0f && angleInDegrees < 85.0f)
+	//	{
+	//		bHit = false; // Ignore steep slopes
+	//	}
+	//}
+
+	//return bHit;
 }
 
 bool UPlayerStateBase::IsGroundedSlide(FHitResult& HitResult)
@@ -121,7 +177,7 @@ bool UPlayerStateBase::IsGroundedSlide(FHitResult& HitResult)
 	/*FHitResult hitResult;*/
 	FVector startLocation = PlayerRef->GetActorLocation();
 	FVector endLocation = startLocation - FVector(0, 0, 100.0f);
-	float sphereRadius = 40.0f;
+	float sphereRadius = 30.0f;
 
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(PlayerRef); // Ignore the player itself in the raycast
@@ -135,8 +191,8 @@ bool UPlayerStateBase::IsGroundedSlide(FHitResult& HitResult)
 		CollisionParams)
 		;
 
-	/*DrawDebugSphere(GetWorld(), startLocation, sphereRadius, 12, FColor::Blue, false, 0.5f);
-	DrawDebugSphere(GetWorld(), endLocation, sphereRadius, 12, FColor::Red, false, 0.5f);*/
+	//DrawDebugSphere(GetWorld(), startLocation, sphereRadius, 12, FColor::Blue, false, 0.5f);
+	//DrawDebugSphere(GetWorld(), endLocation, sphereRadius, 12, FColor::Red, false, 0.5f);
 	//DrawDebugLine(GetWorld(), startLocation, endLocation, FColor::Red, false, 10.0f, 0, 5.0f);
 
 	return bHit;
@@ -150,7 +206,7 @@ bool UPlayerStateBase::IsGroundedOnSlope(FHitResult& HitResult)
 	
 	FVector startLocation = PlayerRef->GetActorLocation();
 	FVector endLocation = startLocation - FVector(0, 0, 100.0f);
-	float sphereRadius = 40.0f;
+	float sphereRadius = 35.0f;
 
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(PlayerRef); // Ignore the player itself in the raycast
@@ -167,12 +223,12 @@ bool UPlayerStateBase::IsGroundedOnSlope(FHitResult& HitResult)
 	DrawDebugSphere(GetWorld(), startLocation, sphereRadius, 12, FColor::Blue, false, 0.5f);
 	DrawDebugSphere(GetWorld(), endLocation, sphereRadius, 12, FColor::Red, false, 0.5f);
 
-	//if (bHit && SlopeCheck(HitResult.ImpactNormal))
-	//{
-	//	// Slope is too steep
-	//	GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("Steep slope detected in  Grounded On Slope Check."));
-	//	return true;
-	//}
+	if (bHit && SlopeCheck(HitResult.ImpactNormal))
+	{
+		// Slope is too steep
+		GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, TEXT("Steep slope detected in Grounded On Slope Check."));
+		return true;
+	}
 
 	return bHit;
 }

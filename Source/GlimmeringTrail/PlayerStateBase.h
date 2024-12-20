@@ -39,4 +39,5 @@ protected:
 	
 	float FrontBackValue = 0;
 	float SideValue = 0;
+	bool FallingFromLedge = false;
 };

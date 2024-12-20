@@ -16,11 +16,10 @@ void UAirborneState::OnEnterState(AActor* OwnerRef)
 
     m_LedgeNormal = FVector::ZeroVector;
     FHitResult GroundHit;
-    bIsFallingFromLedge = OnEdgeCheck(GroundHit);// Check if PLAYER in edge
+    bIsFallingFromLedge = OnEdgeCheck(GroundHit);// Check if player in edge
     bSlopeEdge = IsGroundedOnSlope(GroundHit); // check if player is on slope
     m_Velocity = PlayerRef->PlayerMoveComponent->Velocity;
     UE_LOG(LogTemp, Warning, TEXT("is falling from ledge: %s"), bIsFallingFromLedge ? TEXT("True") : TEXT("False"));
-
 }
 
 void UAirborneState::TickState(float DeltaTime)
@@ -29,19 +28,19 @@ void UAirborneState::TickState(float DeltaTime)
 	//******************** early jump termination needs to be added
 
     FHitResult hitResult;
-   
-    if (bIsFallingFromLedge && !bSlopeEdge) {
+    if (FallingFromLedge && OnEdgeCheck(hitResult)) {
         IsFallingFromLedge(hitResult, DeltaTime);
-    }
-    else {
+    }else {
         FallingMovement(hitResult, DeltaTime);
     }
     
-   // UE_LOG(LogTemp, Warning, TEXT("Current Velocity: %s"), *PlayerRef->PlayerMoveComponent->Velocity.ToString());
-
-   if (IsGrounded(hitResult) || IsGroundedSlide(hitResult)) {
+    if (IsGrounded(hitResult)) {
         PlayerRef->StateManager->SwitchStateByKey("Grounded");
     }
+
+//   if (/*IsGrounded(hitResult) ||*/ IsGroundedSlide(hitResult)) {
+//        PlayerRef->StateManager->SwitchStateByKey("Grounded");
+//   }
 }
 
 void UAirborneState::OnExitState()
@@ -50,6 +49,7 @@ void UAirborneState::OnExitState()
     bIsFallingFromLedge = false;
     bSlopeEdge = false;
     m_LedgeNormal = FVector::ZeroVector;
+    FallingFromLedge = false;
 }
 
 void UAirborneState::IsFallingFromLedge(FHitResult& hitResult, float deltaTime)
@@ -61,21 +61,19 @@ void UAirborneState::IsFallingFromLedge(FHitResult& hitResult, float deltaTime)
     if (FMath::Abs(PlayerController->CurrentFrontBackValue) == FMath::Abs(PlayerController->CurrentSideValue)) {
         m_Velocity += PlayerRef->GetActorForwardVector() * PlayerController->CurrentFrontBackValue * 15.0f;
         m_Velocity += PlayerRef->GetActorRightVector() * PlayerController->CurrentSideValue * 15.0f;
-
-    }
-    else {
+    }else {
         m_Velocity += PlayerRef->GetActorForwardVector() * PlayerController->CurrentFrontBackValue * 30.0f;
         m_Velocity += PlayerRef->GetActorRightVector() * PlayerController->CurrentSideValue * 30.0f;
     }
   
-    FVector outwardForce = m_LedgeNormal * 20000.0f; // Push outward from edge
+    FVector outwardForce = m_LedgeNormal * 200000.0f; // Push outward from edge
 
     UE_LOG(LogTemp, Warning, TEXT("nomral vector : %s"), *m_LedgeNormal.ToString());
     m_Velocity += outwardForce * deltaTime;
 
-
     ClampHorizontalVelocity(m_Velocity, maxHorizontalHeight);
     FVector Translation = m_Velocity * deltaTime;
+
     PlayerRef->AddActorWorldOffset(Translation, true, &hitResult);
 
     if (hitResult.IsValidBlockingHit()) {
@@ -98,7 +96,6 @@ void UAirborneState::FallingMovement(FHitResult& hitResult, float DeltaTime){
     if (FMath::Abs(PlayerController->CurrentFrontBackValue) == FMath::Abs(PlayerController->CurrentSideValue)) {
         m_Velocity += PlayerRef->GetActorForwardVector() * PlayerController->CurrentFrontBackValue *7.5f;
         m_Velocity += PlayerRef->GetActorRightVector() * PlayerController->CurrentSideValue * 7.5f;
-
     }
     else {
         m_Velocity += PlayerRef->GetActorForwardVector() * PlayerController->CurrentFrontBackValue * 15.0f;
@@ -121,13 +118,12 @@ void UAirborneState::FallingMovement(FHitResult& hitResult, float DeltaTime){
 
 bool UAirborneState::OnEdgeCheck(FHitResult& hitres/*, float DeltaTime*/)
 {
-  
     FVector belowPlayerLocation = PlayerRef->GetActorLocation() - FVector(0, 0, 100.0f); // Bottom of capsule
     FVector offsets[] = {
-        FVector(65, 0, 0), 
-        FVector(-65, 0, 0), 
-        FVector(0, 65, 0), 
-        FVector(0, -65, 0)
+        FVector(50, 0, 0), 
+        FVector(-50, 0, 0), 
+        FVector(0, 50, 0), 
+        FVector(0, -50, 0)
     };
   
     bool bHits[4] = { false, false, false, false };
@@ -153,24 +149,32 @@ bool UAirborneState::OnEdgeCheck(FHitResult& hitres/*, float DeltaTime*/)
         if (!bDHits[i]) missedDownRays += 1;
     }
 
-    if ((bHits[0] && bHits[1]) || (bHits[2] && bHits[3])){
-        return false; 
+  
+    //m_LedgeNormal = FVector::ZeroVector;
+    //for (int32 i = 0; i < 4; ++i) {
+    //    if (!bHits[i]) { m_LedgeNormal += offsets[i]; }
+    //}
+    //m_LedgeNormal.Normalize();
+
+    //// Final edge detection logic
+    //if (missedRays >= 3 && missedDownRays >= 3){
+    //    return true;
+    //}
+    //return false;
+
+    // Combine logic for edge detection
+    if ((missedRays >= 2) && (missedDownRays >= 2)) {
+        m_LedgeNormal = FVector::ZeroVector;
+        for (int32 i = 0; i < 4; ++i) {
+            if (!bHits[i]) { m_LedgeNormal += offsets[i]; }
+        }
+        m_LedgeNormal.Normalize();
+
+        DrawDebugLine(GetWorld(), PlayerRef->GetActorLocation(), PlayerRef->GetActorLocation() + m_LedgeNormal * 100.0f, FColor::Yellow, false, -1.0f, 0, 2.0f);
+
+        return true; 
     }
-
-    m_LedgeNormal = FVector::ZeroVector;
-    for (int32 i = 0; i < 4; ++i) {
-        if (!bHits[i]) { m_LedgeNormal += offsets[i]; }
-    }
-    m_LedgeNormal.Normalize();
-
-    // Final edge detection logic
-    if (missedRays >= 3 && missedDownRays >= 3)
-    {
-        return true;
-    }
-
-    return false;
-
+    return false; 
 }
 
 void UAirborneState::ClampHorizontalVelocity(FVector& Velocity, float MaxHorizontalSpeed)
@@ -178,9 +182,8 @@ void UAirborneState::ClampHorizontalVelocity(FVector& Velocity, float MaxHorizon
     FVector HorizontalVelocity = FVector(Velocity.X, Velocity.Y, 0.0f); // Extract horizontal components
     float HorizontalSpeed = HorizontalVelocity.Size(); // magnitude
 
-    if (HorizontalSpeed > MaxHorizontalSpeed)
-    {
-        HorizontalVelocity = HorizontalVelocity.GetSafeNormal() * MaxHorizontalSpeed; // Scale down to max speed
+    if (HorizontalSpeed > MaxHorizontalSpeed){ 
+        HorizontalVelocity = HorizontalVelocity.GetSafeNormal() * MaxHorizontalSpeed; //scale down to get the horizontal speed 800 * 600
         Velocity.X = HorizontalVelocity.X;
         Velocity.Y = HorizontalVelocity.Y;
     }

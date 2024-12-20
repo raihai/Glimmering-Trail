@@ -41,11 +41,8 @@ void UGroundedState::TickState(float DeltaTime)
 	}
 }
 
-
 void UGroundedState::OnExitState()
 {
 	Super::OnExitState();
-
 	UE_LOG(LogTemp, Warning, TEXT("lEAVING Grounded Velocity: %s"), *PlayerRef->PlayerMoveComponent->Velocity.ToString());
-	
 }
