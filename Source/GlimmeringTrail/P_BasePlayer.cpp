@@ -21,7 +21,7 @@ AP_BasePlayer::AP_BasePlayer()
 	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("RootComponent"));
 	SetRootComponent(CapsuleComponent);
 
-	CapsuleComponent->InitCapsuleSize(34.0f, 88.0f);
+	CapsuleComponent->InitCapsuleSize(30.0f, 80.0f);
 	CapsuleComponent->SetCollisionProfileName(TEXT("Pawn"));
 
 	//GRavity

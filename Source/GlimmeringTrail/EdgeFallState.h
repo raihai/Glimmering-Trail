@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "PlayerStateBase.h"
-#include "AirborneState.generated.h"
+#include "EdgeFallState.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class GLIMMERINGTRAIL_API UAirborneState : public UPlayerStateBase
+class GLIMMERINGTRAIL_API UEdgeFallState : public UPlayerStateBase
 {
 	GENERATED_BODY()
 
@@ -18,17 +18,13 @@ public:
 
 protected:
 	virtual void HandleJump() override;
-	
+
 	virtual void OnEnterState(AActor* OwnerRef);
 	virtual void TickState(float DeltaTime) override;
 	virtual void OnExitState() override;
 
 private:
-	void IsFallingFromLedge(FHitResult& hitResult, float deltaTime);
-	void FallingMovement(FHitResult& HitResult, float DelaTime);
-	bool OnEdgeCheck(FHitResult& hitres);
-	
-
+	void FallingFromLedge(FHitResult& hitResult, float deltaTime);
 
 	FVector m_Velocity;
 	FVector m_LedgeNormal;
@@ -40,5 +36,4 @@ private:
 
 	float GroundCheckDelay = 0.2f;
 	float ElapsedTimeInAirborne = 0.0f;
-	
 };

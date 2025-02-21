@@ -24,10 +24,9 @@ protected:
 private:
 
 	void MovePlayer(FHitResult& hitresult, float DeltaTime);
-	/*void MovePlayerUpSlope(FHitResult& hitresult, float DeltaTime);*/
 
 	FVector GetAirResistance();
-	bool testFunc(FHitResult& hitResult);
+	bool IsPlayerOnEdge(FHitResult& hitResult);
 
 	float WalkForce = 30000;
 	float halfWalkForce = 20000;

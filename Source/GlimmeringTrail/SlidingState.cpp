@@ -14,10 +14,10 @@ void USlidingState::TickState(float DeltaTime)
 	Super::TickState(DeltaTime);
 
 	FHitResult hitResult;
-	IsGroundedSlide(hitResult);
+	IsGrounded(hitResult);
 	FVector surfaceNormal = hitResult.ImpactNormal;
 
-	if (!SlopeCheck(surfaceNormal) ) {
+	if (!SlopeCheck(surfaceNormal)) {
 		PlayerRef->PlayerMoveComponent->Velocity = FVector::ZeroVector;
 		PlayerRef->StateManager->SwitchStateByKey("Grounded");
 		return;
@@ -29,6 +29,7 @@ void USlidingState::TickState(float DeltaTime)
 void USlidingState::OnExitState()
 {
 	Super::OnExitState();
+	//PlayerRef->PlayerMoveComponent->Velocity = FVector::ZeroVector;
 	UE_LOG(LogTemp, Warning, TEXT("Slide State leaving Velocity: %s "), *PlayerRef->PlayerMoveComponent->Velocity.ToString());
 }
 

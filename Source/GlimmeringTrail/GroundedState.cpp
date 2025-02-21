@@ -5,7 +5,6 @@
 
 void UGroundedState::HandleJump()
 {
-	// jumping from grounded state
 	Super::HandleJump();
 }
 
@@ -14,12 +13,6 @@ void UGroundedState::OnEnterState(AActor* OwnerRef)
 	Super::OnEnterState(OwnerRef);
 
 	UE_LOG(LogTemp, Warning, TEXT("Entering Grounded State"));
-
-	if (!FMath::IsNearlyZero(PlayerController->CurrentFrontBackValue) || !FMath::IsNearlyZero(PlayerController->CurrentSideValue))
-	{
-		PlayerRef->StateManager->SwitchStateByKey("Walking");
-		return;
-	}
 }
 
 void UGroundedState::TickState(float DeltaTime)
@@ -27,8 +20,15 @@ void UGroundedState::TickState(float DeltaTime)
 	Super::TickState(DeltaTime);
 
 	FHitResult checkBelowPlayer;
-	IsGroundedSlide(checkBelowPlayer);
 
+	if (IsGroundedRay(checkBelowPlayer)){
+		ApplyFloatingEffect(checkBelowPlayer, DeltaTime);
+	}
+
+	if (!IsGroundedRay(checkBelowPlayer)) {
+		PlayerRef->StateManager->SwitchStateByKey("Air");
+	}
+	
 	if (SlopeCheck(checkBelowPlayer.ImpactNormal)) {
 		UE_LOG(LogTemp, Warning, TEXT("There is a slope"));
 		PlayerRef->StateManager->SwitchStateByKey("Sliding");

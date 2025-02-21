@@ -31,12 +31,14 @@ protected:
 	virtual void HandleJump();
 
 	virtual void HandleRunning();
+	virtual void ClampHorizontalVelocity(FVector& Velocity, float MaxHorizontalSpeed);
+	virtual void ApplyFloatingEffect(FHitResult& HitResult, float DeltaTime);
 	
 	virtual bool IsGrounded(FHitResult& HitResult);
 	virtual bool IsGroundedOnSlope(FHitResult& HitResult);
 	virtual bool SlopeCheck(FVector& ImpactNormal); 
-	virtual bool IsGroundedSlide(FHitResult& HitResult);
-	
+	virtual bool IsGroundedRay(FHitResult& HitResult);
+
 	float FrontBackValue = 0;
 	float SideValue = 0;
 	bool FallingFromLedge = false;
